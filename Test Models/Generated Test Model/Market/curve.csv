@@ -1,0 +1,9 @@
+# Market/curve.csv
+# Mon Sep 21 12:02:37 2020
+# Market_1
+# market_id,timestamp,sort_index,bidder_name,bid_quantity,bid_price
+# supply curve at 2012-04-08 00:30:00 UTC: 1.000000 total and 0.000000 unresponsive
+1,2012-04-08 00:30:00 UTC,   0,Market_1,1.000,0.065140
+# demand curve at 2012-04-08 00:30:00 UTC: 0.000000 total and 0.000000 unresponsive
+# marginal quantity of 0.000000 kW (0.000000 %)
+# curve cleared 0.000000 at $0.065040 with null type

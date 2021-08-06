@@ -1,0 +1,49 @@
+library(ggplot2)
+library(scales)
+library(stringr)
+
+#Ein Eintrag im vector steht für ein Haus im EuroModel. Da diese nicht chronologisch erzeugt wurden.  
+europeanModelPlots<- function()
+{
+vector <- c(34,47,70,73,74,83,178,208,225,248,249,264,276,289,314,320,327,337,342,349,387,388,406,458,502,522,539,556,562,563,611,614,619,629,639,676,682,688,701,702,755,778,780,785,813,817,835,860,861,886,896,898,899,906)
+for(i in vector)
+{
+nameoffile<-paste("strom_",i,".csv", sep="")
+nameoffile2<-paste("strom_",i,".png", sep="")
+strom1 <- read.table(file = nameoffile,header=TRUE, sep = ",",stringsAsFactors = FALSE,comment.char = "", skip = 8)
+strom1[1]<-substr(strom1[[1]],1,nchar(strom1[[1]])-4)
+strom1[1]<-as.POSIXct(strom1[[1]], format='%Y-%m-%d  %H:%M:%S')
+plot1<-ggplot(data=strom1, aes(x=strom1[[1]], y=strom1[[4]], group=1)) +geom_line()+ scale_x_datetime(labels = date_format("%Y-%m-%d  %H:%M:%S"),name ="Zeit") +ylab("Wh") + coord_cartesian(ylim=c(0,5000))
+ggsave(nameoffile2)
+}
+}
+
+#i steht für die Anzahl der Häuser
+PlotsOfSelfModel<- function()
+{
+for(i in 1:98)
+{
+nameoffile<-paste("strom_",i,".csv", sep="")
+nameoffile2<-paste("strom_",i,".png", sep="")
+strom1 <- read.table(file = nameoffile,header=TRUE, sep = ",",stringsAsFactors = FALSE,comment.char = "", skip = 8)
+strom1[1]<-substr(strom1[[1]],1,nchar(strom1[[1]])-4)
+strom1[1]<-as.POSIXct(strom1[[1]], format='%Y-%m-%d  %H:%M:%S')
+plot1<-ggplot(data=strom1, aes(x=strom1[[1]], y=strom1[[4]], group=1)) +geom_line()+ scale_x_datetime(labels = date_format("%Y-%m-%d  %H:%M:%S"),name ="Zeit") +ylab("Wh") + coord_cartesian(ylim=c(0,5000))
+ggsave(nameoffile2)
+}
+}
+
+#i steht für die Anzahl der Mehrfamilienhäuser
+PlotsForApartmentBuilding<- function()
+{
+for(i in 1:6)
+{
+nameoffile<-paste("apartment_building",i,"_power.csv", sep="")
+nameoffile2<-paste("apartment_building",i,"_power.png", sep="")
+strom1 <- read.table(file = nameoffile,header=TRUE, sep = ",",stringsAsFactors = FALSE,comment.char = "", skip = 8)
+strom1[1]<-substr(strom1[[1]],1,nchar(strom1[[1]])-4)
+strom1[1]<-as.POSIXct(strom1[[1]], format='%Y-%m-%d  %H:%M:%S')
+plot1<-ggplot(data=strom1, aes(x=strom1[[1]], y=strom1[[2]], group=1)) +geom_line()+ scale_x_datetime(labels = date_format("%Y-%m-%d  %H:%M:%S"),name ="Zeit") +ylab("Wh") + coord_cartesian(ylim=c(0,5000)) + theme_minimal()
+ggsave(nameoffile2)
+}
+}

@@ -1,0 +1,38 @@
+file <- read.table(file = "Lines2.csv",header=TRUE, sep = ",",stringsAsFactors = FALSE,dec = ".",fill = T)
+
+LineCode<-Units<-Length<-Bus2<-Phases<-Phases2<-Bus1<-Name<-c()
+for(i in 1:2){
+    Name[1]<-"HVMV_Sub_connector"
+    Bus1[1]<-"_HVMV_Sub_LSB"
+    Bus2[1]<-"HVMV_Sub_48332"
+    Length[1]<-"0.010000000"
+    Units[1]<-"km"
+    LineCode[1]<-"3PH-Connector"
+    Phases[1]<-Phases2[1]<-"ABC"
+
+
+    name<-paste("Line_",i, sep="")
+    Name[i+1]<- name
+
+    bus1<-"name"
+    Bus1[i+1]<-bus1
+
+    phases<-"ABC"
+    Phases2[i+1]<-Phases[i+1]<-phases
+
+    bus2<-"name"
+    Bus2[i+1]<-bus2
+
+    x1 <- runif(1, 0.003, 0.05)
+    Length[i+1]<-x1
+
+    units<-"km"
+    Units[i+1]<-units
+
+    linecode<-"3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR"
+    LineCode[i+1]<-linecode
+}
+
+df<-data.frame(Name, Bus1, Phases,Bus2,Phases2,Length,Units,LineCode)
+
+write.table(df,"Lines.csv", row.names = FALSE,col.names=TRUE,quote = FALSE, sep=",")

@@ -1,0 +1,853 @@
+object node {
+phases ABC;
+name "node_99";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_99; 
+     phases CS;
+     from "node_99";
+     to "tnode_99";
+     configuration "7575C";
+}
+object triplex_node {
+     name "tnode_99";
+     nominal_voltage 120;
+     phases CS;
+
+}
+
+//Step3
+     // Converted from load: 4070.0+1020.0j
+object recorder {
+     name "Recorder99";
+     parent "meter_99";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_99.csv;
+}
+object triplex_line { 
+     name "tline_99";  
+     phases CS;
+     from "tnode_99";
+     to "meter_99";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_99";
+     phases CS;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_99";
+  name "house_99";
+  object ZIPload {
+         name "house99_load";
+         base_power LOAD99_player.value;
+  };
+
+  }
+
+object player {
+name LOAD99_player;
+file player/Load_profile_99.player;
+}
+
+object node {
+phases ABC;
+name "node_100";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_100; 
+     phases AS;
+     from "node_100";
+     to "tnode_100";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_100";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 5320.0+1333.3j
+object recorder {
+     name "Recorder100";
+     parent "meter_100";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_100.csv;
+}
+object triplex_line { 
+     name "tline_100";  
+     phases AS;
+     from "tnode_100";
+     to "meter_100";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_100";
+     phases AS;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_100";
+  name "house_100";
+  object ZIPload {
+         name "house100_load";
+         base_power LOAD100_player.value;
+  };
+
+  }
+
+object player {
+name LOAD100_player;
+file player/Load_profile_100.player;
+}
+
+object node {
+phases ABC;
+name "node_101";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_101; 
+     phases AS;
+     from "node_101";
+     to "tnode_101";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_101";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 5320.0+1333.3j
+object recorder {
+     name "Recorder101";
+     parent "meter_101";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_101.csv;
+}
+object triplex_line { 
+     name "tline_101";  
+     phases AS;
+     from "tnode_101";
+     to "meter_101";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_101";
+     phases AS;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_101";
+  name "house_101";
+  object ZIPload {
+         name "house101_load";
+         base_power LOAD101_player.value;
+  };
+
+  }
+
+object player {
+name LOAD101_player;
+file player/Load_profile_101.player;
+}
+
+object node {
+phases ABC;
+name "node_102";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_102; 
+     phases AS;
+     from "node_102";
+     to "tnode_102";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_102";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 3550.0+889.7j
+object recorder {
+     name "Recorder102";
+     parent "meter_102";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_102.csv;
+}
+object triplex_line { 
+     name "tline_102";  
+     phases AS;
+     from "tnode_102";
+     to "meter_102";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_102";
+     phases AS;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_102";
+  name "house_102";
+  object ZIPload {
+         name "house102_load";
+         base_power LOAD102_player.value;
+  };
+
+  }
+
+object player {
+name LOAD102_player;
+file player/Load_profile_102.player;
+}
+
+object node {
+phases ABC;
+name "node_103";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_103; 
+     phases AS;
+     from "node_103";
+     to "tnode_103";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_103";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 8870.0+2223.0j
+object recorder {
+     name "Recorder103";
+     parent "meter_103";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_103.csv;
+}
+object triplex_line { 
+     name "tline_103";  
+     phases AS;
+     from "tnode_103";
+     to "meter_103";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_103";
+     phases AS;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_103";
+  name "house_103";
+  object ZIPload {
+         name "house103_load";
+         base_power LOAD103_player.value;
+  };
+
+  }
+
+object player {
+name LOAD103_player;
+file player/Load_profile_103.player;
+}
+
+object node {
+phases ABC;
+name "node_104";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_104; 
+     phases AS;
+     from "node_104";
+     to "tnode_104";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_104";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 3550.0+889.7j
+object recorder {
+     name "Recorder104";
+     parent "meter_104";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_104.csv;
+}
+object triplex_line { 
+     name "tline_104";  
+     phases AS;
+     from "tnode_104";
+     to "meter_104";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_104";
+     phases AS;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_104";
+  name "house_104";
+  object ZIPload {
+         name "house104_load";
+         base_power LOAD104_player.value;
+  };
+
+  }
+
+object player {
+name LOAD104_player;
+file player/Load_profile_104.player;
+}
+
+object node {
+phases ABC;
+name "node_105";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_105; 
+     phases AS;
+     from "node_105";
+     to "tnode_105";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_105";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 8870.0+2223.0j
+object recorder {
+     name "Recorder105";
+     parent "meter_105";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_105.csv;
+}
+object triplex_line { 
+     name "tline_105";  
+     phases AS;
+     from "tnode_105";
+     to "meter_105";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_105";
+     phases AS;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_105";
+  name "house_105";
+  object ZIPload {
+         name "house105_load";
+         base_power LOAD105_player.value;
+  };
+
+  }
+
+object player {
+name LOAD105_player;
+file player/Load_profile_105.player;
+}
+
+object node {
+phases ABC;
+name "node_106";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_106; 
+     phases BS;
+     from "node_106";
+     to "tnode_106";
+     configuration "7575B";
+}
+object triplex_node {
+     name "tnode_106";
+     nominal_voltage 120;
+     phases BS;
+
+}
+
+//Step3
+     // Converted from load: 9730.0+2438.6j
+object recorder {
+     name "Recorder106";
+     parent "meter_106";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_106.csv;
+}
+object triplex_line { 
+     name "tline_106";  
+     phases BS;
+     from "tnode_106";
+     to "meter_106";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_106";
+     phases BS;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_106";
+  name "house_106";
+  object ZIPload {
+         name "house106_load";
+         base_power LOAD106_player.value;
+  };
+
+  }
+
+object player {
+name LOAD106_player;
+file player/Load_profile_106.player;
+}
+
+object node {
+phases ABC;
+name "node_107";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_107; 
+     phases BS;
+     from "node_107";
+     to "tnode_107";
+     configuration "7575B";
+}
+object triplex_node {
+     name "tnode_107";
+     nominal_voltage 120;
+     phases BS;
+
+}
+
+//Step3
+     // Converted from load: 5840.0+1463.6j
+object recorder {
+     name "Recorder107";
+     parent "meter_107";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_107.csv;
+}
+object triplex_line { 
+     name "tline_107";  
+     phases BS;
+     from "tnode_107";
+     to "meter_107";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_107";
+     phases BS;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_107";
+  name "house_107";
+  object ZIPload {
+         name "house107_load";
+         base_power LOAD107_player.value;
+  };
+
+  }
+
+object player {
+name LOAD107_player;
+file player/Load_profile_107.player;
+}
+
+object node {
+phases ABC;
+name "node_108";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_108; 
+     phases BS;
+     from "node_108";
+     to "tnode_108";
+     configuration "7575B";
+}
+object triplex_node {
+     name "tnode_108";
+     nominal_voltage 120;
+     phases BS;
+
+}
+
+//Step3
+     // Converted from load: 5840.0+1463.6j
+object recorder {
+     name "Recorder108";
+     parent "meter_108";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_108.csv;
+}
+object triplex_line { 
+     name "tline_108";  
+     phases BS;
+     from "tnode_108";
+     to "meter_108";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_108";
+     phases BS;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_108";
+  name "house_108";
+  object ZIPload {
+         name "house108_load";
+         base_power LOAD108_player.value;
+  };
+
+  }
+
+object player {
+name LOAD108_player;
+file player/Load_profile_108.player;
+}
+
+object node {
+phases ABC;
+name "node_109";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_109; 
+     phases BS;
+     from "node_109";
+     to "tnode_109";
+     configuration "7575B";
+}
+object triplex_node {
+     name "tnode_109";
+     nominal_voltage 120;
+     phases BS;
+
+}
+
+//Step3
+     // Converted from load: 5840.0+1463.6j
+object recorder {
+     name "Recorder109";
+     parent "meter_109";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_109.csv;
+}
+object triplex_line { 
+     name "tline_109";  
+     phases BS;
+     from "tnode_109";
+     to "meter_109";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_109";
+     phases BS;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_109";
+  name "house_109";
+  object ZIPload {
+         name "house109_load";
+         base_power LOAD109_player.value;
+  };
+
+  }
+
+object player {
+name LOAD109_player;
+file player/Load_profile_109.player;
+}
+
+object node {
+phases ABC;
+name "node_110";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_110; 
+     phases BS;
+     from "node_110";
+     to "tnode_110";
+     configuration "7575B";
+}
+object triplex_node {
+     name "tnode_110";
+     nominal_voltage 120;
+     phases BS;
+
+}
+
+//Step3
+     // Converted from load: 3890.0+974.9j
+object recorder {
+     name "Recorder110";
+     parent "meter_110";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_110.csv;
+}
+object triplex_line { 
+     name "tline_110";  
+     phases BS;
+     from "tnode_110";
+     to "meter_110";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_110";
+     phases BS;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_110";
+  name "house_110";
+  object ZIPload {
+         name "house110_load";
+         base_power LOAD110_player.value;
+  };
+
+  }
+
+object player {
+name LOAD110_player;
+file player/Load_profile_110.player;
+}
+
+object node {
+phases ABC;
+name "node_111";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_111; 
+     phases BS;
+     from "node_111";
+     to "tnode_111";
+     configuration "7575B";
+}
+object triplex_node {
+     name "tnode_111";
+     nominal_voltage 120;
+     phases BS;
+
+}
+
+//Step3
+     // Converted from load: 5840.0+1463.6j
+object recorder {
+     name "Recorder111";
+     parent "meter_111";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_111.csv;
+}
+object triplex_line { 
+     name "tline_111";  
+     phases BS;
+     from "tnode_111";
+     to "meter_111";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_111";
+     phases BS;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_111";
+  name "house_111";
+  object ZIPload {
+         name "house111_load";
+         base_power LOAD111_player.value;
+  };
+
+  }
+
+object player {
+name LOAD111_player;
+file player/Load_profile_111.player;
+}
+
+object node {
+phases ABC;
+name "node_112";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_112; 
+     phases BS;
+     from "node_112";
+     to "tnode_112";
+     configuration "7575B";
+}
+object triplex_node {
+     name "tnode_112";
+     nominal_voltage 120;
+     phases BS;
+
+}
+
+//Step3
+     // Converted from load: 5840.0+1463.6j
+object recorder {
+     name "Recorder112";
+     parent "meter_112";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_112.csv;
+}
+object triplex_line { 
+     name "tline_112";  
+     phases BS;
+     from "tnode_112";
+     to "meter_112";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_112";
+     phases BS;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_112";
+  name "house_112";
+  object ZIPload {
+         name "house112_load";
+         base_power LOAD112_player.value;
+  };
+
+  }
+
+object player {
+name LOAD112_player;
+file player/Load_profile_112.player;
+}

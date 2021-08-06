@@ -1,0 +1,9203 @@
+//IEEE 8500 node test system.
+//  Generated 16-Jul-2020 17:04:11 using Matlab 9.8.0.1380330 (R2020a) Update 2.
+
+clock {
+     starttime '2012-04-08 00:00:00';
+     stoptime '2014-05-08 17:00:00';
+}
+
+module powerflow {
+ 	solver_method NR;
+	 default_maximum_voltage_error 1e-10;
+	 NR_superLU_procs 1;
+};
+module residential {
+    implicit_enduses NONE;
+	ANSI_voltage_check FALSE;
+}
+module climate;
+module tape;
+
+module market;
+
+object auction {
+    name Market_1;
+    special_mode NONE;
+    unit kW;
+    period 1800;
+    init_price 30;
+    init_stdev 5;
+    capacity_reference_object HVMV_Sub;
+    capacity_reference_property power_out_real;
+    max_capacity_reference_bid_quantity 1200;
+    object player {
+        property capacity_reference_bid_price;
+        file Market/ExamplePrices2.player;
+        loop 150;
+ };
+    warmup 0;
+    transaction_log_file Market/log_file.csv;
+    curve_log_file Market/curve.csv;
+    curve_log_info EXTRA;
+}
+
+//object auction {
+//    name Market_1;
+//    period 900;
+//    special_mode BUYERS_ONLY;
+//    unit kW;
+//    capacity_reference_object HVMV_Sub;
+//    capacity_reference_property power_out_real;
+//    max_capacity_reference_bid_quantity 1200; //Defaults to 1200 kW
+//    init_price 0.10;
+//    init_stdev 0.03;
+//    warmup 0;
+//     object player {
+//         file Market/ExamplePrices2.player;
+//         loop 10;
+//         property capacity_reference_bid_price;
+//     };    
+//}
+
+#set minimum_timestep=1800;
+#set profiler=1;
+#set relax_naming_rules=1;
+#set suppress_repeat_messages=1;
+#set savefile="8500_balanced_NR.xml";
+// Transformer and configuration at feeder
+
+object transformer_configuration:27500 {
+     connect_type DELTA_GWYE;
+     name trans_config_1;
+     install_type PADMOUNT;
+     power_rating 27500kVA;
+     primary_voltage 115.0kV;
+     secondary_voltage 12.47kV;
+     reactance 0.15510;
+     resistance 0.01344;
+}
+
+object transformer {
+     phases ABCN;
+     name "HVMV_Sub";
+     from "HVMV_Sub_HSB";
+     to "regxfmr_HVMV_Sub_LSB";
+     configuration trans_config_1;
+
+   object recorder {
+          file strom/Netz.csv;
+          interval 1800;
+          limit 1440;
+          property power_out_real;
+     };
+}
+
+object node {
+     phases ABCN;
+     name "regxfmr_HVMV_Sub_LSB";
+     nominal_voltage 7199.558;
+}
+
+object node {
+     phases ABCN;
+     name "HVMV_Sub_HSB";
+     bustype SWING;
+     voltage_A 69512-0.7d;
+     voltage_B 69557-120.7d;
+     voltage_C 69595+119.3d;
+     nominal_voltage 69512;
+}
+
+object node {
+     phases ABCN;
+     name "HVMV_Sub_48332";
+     nominal_voltage 7199.558;
+}
+
+object regulator {
+     name "FEEDER_REG";
+     phases ABCN;
+     from "regxfmr_HVMV_Sub_LSB";
+     to "_HVMV_Sub_LSB";
+     configuration reg_config_1;
+}
+
+object regulator_configuration {
+     connect_type 1;
+     name reg_config_1;
+     Control OUTPUT_VOLTAGE;
+     band_center 7500.0;
+     band_width 120.0;
+     time_delay 60.0;
+     raise_taps 16;
+     lower_taps 16;
+     regulation 0.1;
+     Type B;
+}
+
+// Center-tap transformer configurations
+
+object transformer_configuration {
+     name "1515A";
+     connect_type SINGLE_PHASE_CENTER_TAPPED;
+     install_type POLETOP;
+     primary_voltage 7200.0V;
+     secondary_voltage 120.0V;
+     power_rating 15.0kVA;
+     powerA_rating 15.0kVA;
+     impedance 0.006000+0.013600j;
+     impedance1 0.012000+0.006800j;
+     impedance2 0.012000+0.006800j;
+     shunt_impedance 1728000+691200j;
+}
+
+object transformer_configuration {
+     name "2525B";
+     connect_type SINGLE_PHASE_CENTER_TAPPED;
+     install_type POLETOP;
+     primary_voltage 7200.0;
+     secondary_voltage 120.0;
+     power_rating 25.0;
+     powerB_rating 25.0;
+     impedance 0.006+0.0136j;
+     impedance1 0.012+0.0204j;
+     impedance2 0.012+0.0204j;
+     shunt_impedance 1036800+414720j;
+}
+
+object transformer_configuration {
+     name "1515C";
+     connect_type SINGLE_PHASE_CENTER_TAPPED;
+     install_type POLETOP;
+     primary_voltage 7200.0;
+     secondary_voltage 120.0;
+     power_rating 15.0;
+     powerC_rating 15.0;
+     impedance 0.006+0.0136j;
+     impedance1 0.012+0.0204j;
+     impedance2 0.012+0.0204j;
+     shunt_impedance 1728000+691200j;
+}
+
+object transformer_configuration {
+     name "3838A";
+     connect_type SINGLE_PHASE_CENTER_TAPPED;
+     install_type POLETOP;
+     primary_voltage 7200.0;
+     secondary_voltage 120.0;
+     power_rating 37.5;
+     powerA_rating 37.5;
+     impedance 0.006+0.0136j;
+     impedance1 0.012+0.0204j;
+     impedance2 0.012+0.0204j;
+     shunt_impedance 691200+276480j;
+}
+
+object transformer_configuration {
+     name "1515B";
+     connect_type SINGLE_PHASE_CENTER_TAPPED;
+     install_type POLETOP;
+     primary_voltage 7200.0;
+     secondary_voltage 120.0;
+     power_rating 15.0;
+     powerB_rating 15.0;
+     impedance 0.006+0.0136j;
+     impedance1 0.012+0.0204j;
+     impedance2 0.012+0.0204j;
+     shunt_impedance 1728000+691200j;
+}
+
+object transformer_configuration {
+     name "5050A";
+     connect_type SINGLE_PHASE_CENTER_TAPPED;
+     install_type POLETOP;
+     primary_voltage 7200.0;
+     secondary_voltage 120.0;
+     power_rating 50.0;
+     powerA_rating 50.0;
+     impedance 0.006+0.0136j;
+     impedance1 0.012+0.0204j;
+     impedance2 0.012+0.0204j;
+     shunt_impedance 518400+207360j;
+}
+
+object transformer_configuration {
+     name "5050B";
+     connect_type SINGLE_PHASE_CENTER_TAPPED;
+     install_type POLETOP;
+     primary_voltage 7200.0;
+     secondary_voltage 120.0;
+     power_rating 50.0;
+     powerB_rating 50.0;
+     impedance 0.006+0.0136j;
+     impedance1 0.012+0.0204j;
+     impedance2 0.012+0.0204j;
+     shunt_impedance 518400+207360j;
+}
+
+object transformer_configuration {
+     name "5050C";
+     connect_type SINGLE_PHASE_CENTER_TAPPED;
+     install_type POLETOP;
+     primary_voltage 7200.0;
+     secondary_voltage 120.0;
+     power_rating 50.0;
+     powerC_rating 50.0;
+     impedance 0.006+0.0136j;
+     impedance1 0.012+0.0204j;
+     impedance2 0.012+0.0204j;
+     shunt_impedance 518400+207360j;
+}
+
+object transformer_configuration {
+     name "1010A";
+     connect_type SINGLE_PHASE_CENTER_TAPPED;
+     install_type POLETOP;
+     primary_voltage 7200.0;
+     secondary_voltage 120.0;
+     power_rating 10.0;
+     powerA_rating 10.0;
+     impedance 0.006+0.0136j;
+     impedance1 0.012+0.0204j;
+     impedance2 0.012+0.0204j;
+     shunt_impedance 2592000+1036800j;
+}
+
+object transformer_configuration {
+     name "1010B";
+     connect_type SINGLE_PHASE_CENTER_TAPPED;
+     install_type POLETOP;
+     primary_voltage 7200.0;
+     secondary_voltage 120.0;
+     power_rating 10.0;
+     powerB_rating 10.0;
+     impedance 0.006+0.0136j;
+     impedance1 0.012+0.0204j;
+     impedance2 0.012+0.0204j;
+     shunt_impedance 2592000+1036800j;
+}
+
+object transformer_configuration {
+     name "2525A";
+     connect_type SINGLE_PHASE_CENTER_TAPPED;
+     install_type POLETOP;
+     primary_voltage 7200.0;
+     secondary_voltage 120.0;
+     power_rating 25.0;
+     powerA_rating 25.0;
+     impedance 0.006+0.0136j;
+     impedance1 0.012+0.0204j;
+     impedance2 0.012+0.0204j;
+     shunt_impedance 1036800+414720j;
+}
+
+object transformer_configuration {
+     name "1010C";
+     connect_type SINGLE_PHASE_CENTER_TAPPED;
+     install_type POLETOP;
+     primary_voltage 7200.0;
+     secondary_voltage 120.0;
+     power_rating 10.0;
+     powerC_rating 10.0;
+     impedance 0.006+0.0136j;
+     impedance1 0.012+0.0204j;
+     impedance2 0.012+0.0204j;
+     shunt_impedance 2592000+1036800j;
+}
+
+object transformer_configuration {
+     name "2525C";
+     connect_type SINGLE_PHASE_CENTER_TAPPED;
+     install_type POLETOP;
+     primary_voltage 7200.0;
+     secondary_voltage 120.0;
+     power_rating 25.0;
+     powerC_rating 25.0;
+     impedance 0.006+0.0136j;
+     impedance1 0.012+0.0204j;
+     impedance2 0.012+0.0204j;
+     shunt_impedance 1036800+414720j;
+}
+
+object transformer_configuration {
+     name "7575C";
+     connect_type SINGLE_PHASE_CENTER_TAPPED;
+     install_type POLETOP;
+     primary_voltage 7200.0;
+     secondary_voltage 120.0;
+     power_rating 75.0;
+     powerC_rating 75.0;
+     impedance 0.006+0.0136j;
+     impedance1 0.012+0.0204j;
+     impedance2 0.012+0.0204j;
+     shunt_impedance 345600+138240j;
+}
+
+object transformer_configuration {
+     name "3838C";
+     connect_type SINGLE_PHASE_CENTER_TAPPED;
+     install_type POLETOP;
+     primary_voltage 7200.0;
+     secondary_voltage 120.0;
+     power_rating 37.5;
+     powerC_rating 37.5;
+     impedance 0.006+0.0136j;
+     impedance1 0.012+0.0204j;
+     impedance2 0.012+0.0204j;
+     shunt_impedance 691200+276480j;
+}
+
+object transformer_configuration {
+     name "55B";
+     connect_type SINGLE_PHASE_CENTER_TAPPED;
+     install_type POLETOP;
+     primary_voltage 7200.0;
+     secondary_voltage 120.0;
+     power_rating 5.0;
+     powerB_rating 5.0;
+     impedance 0.006+0.0136j;
+     impedance1 0.012+0.0204j;
+     impedance2 0.012+0.0204j;
+     shunt_impedance 5184000+2073600j;
+}
+
+object transformer_configuration {
+     name "3838B";
+     connect_type SINGLE_PHASE_CENTER_TAPPED;
+     install_type POLETOP;
+     primary_voltage 7200.0;
+     secondary_voltage 120.0;
+     power_rating 37.5;
+     powerB_rating 37.5;
+     impedance 0.006+0.0136j;
+     impedance1 0.012+0.0204j;
+     impedance2 0.012+0.0204j;
+     shunt_impedance 691200+276480j;
+}
+
+object transformer_configuration {
+     name "7575A";
+     connect_type SINGLE_PHASE_CENTER_TAPPED;
+     install_type POLETOP;
+     primary_voltage 7200.0;
+     secondary_voltage 120.0;
+     power_rating 75.0;
+     powerA_rating 75.0;
+     impedance 0.006+0.0136j;
+     impedance1 0.012+0.0204j;
+     impedance2 0.012+0.0204j;
+     shunt_impedance 345600+138240j;
+}
+
+object transformer_configuration {
+     name "7575B";
+     connect_type SINGLE_PHASE_CENTER_TAPPED;
+     install_type PADMOUNT;
+     primary_voltage 7200.0;
+     secondary_voltage 120.0;
+     power_rating 75.0;
+     powerB_rating 75.0;
+     impedance 0.006+0.0136j;
+     impedance1 0.012+0.0204j;
+     impedance2 0.012+0.0204j;
+     shunt_impedance 345600+138240j;
+     //shunt_impedance 34560+13824j;
+}
+
+object transformer_configuration {
+     name "55A";
+     connect_type SINGLE_PHASE_CENTER_TAPPED;
+     install_type POLETOP;
+     primary_voltage 7200.0;
+     secondary_voltage 120.0;
+     power_rating 5.0;
+     powerA_rating 5.0;
+     impedance 0.006+0.0136j;
+     impedance1 0.012+0.0204j;
+     impedance2 0.012+0.0204j;
+     shunt_impedance 5184000+2073600j;
+}
+
+object transformer_configuration {
+     name "250250A";
+     connect_type SINGLE_PHASE_CENTER_TAPPED;
+     install_type POLETOP;
+     primary_voltage 7200.0;
+     secondary_voltage 120.0;
+     power_rating 250.0;
+     powerA_rating 250.0;
+     impedance 0.006+0.0136j;
+     impedance1 0.012+0.0204j;
+     impedance2 0.012+0.0204j;
+     shunt_impedance 103680+41472j;
+}
+
+object transformer_configuration {
+     name "250250B";
+     connect_type SINGLE_PHASE_CENTER_TAPPED;
+     install_type POLETOP;
+     primary_voltage 7200.0;
+     secondary_voltage 120.0;
+     power_rating 250.0;
+     powerB_rating 250.0;
+     impedance 0.006+0.0136j;
+     impedance1 0.012+0.0204j;
+     impedance2 0.012+0.0204j;
+     shunt_impedance 103680+41472j;
+}
+
+object transformer_configuration {
+     name "250250C";
+     connect_type SINGLE_PHASE_CENTER_TAPPED;
+     install_type POLETOP;
+     primary_voltage 7200.0;
+     secondary_voltage 120.0;
+     power_rating 250.0;
+     powerC_rating 250.0;
+     impedance 0.006+0.0136j;
+     impedance1 0.012+0.0204j;
+     impedance2 0.012+0.0204j;
+     shunt_impedance 103680+41472j;
+}
+
+object transformer_configuration {
+     name "100100B";
+     connect_type SINGLE_PHASE_CENTER_TAPPED;
+     install_type POLETOP;
+     primary_voltage 7200.0;
+     secondary_voltage 120.0;
+     power_rating 100.0;
+     powerB_rating 100.0;
+     impedance 0.006+0.0136j;
+     impedance1 0.012+0.0204j;
+     impedance2 0.012+0.0204j;
+     shunt_impedance 259200+103680j;
+}
+
+// Triplex Node Objects with loads
+
+class player {
+      double value;
+}
+//Step1
+object node {
+phases ABC;
+name "node_1";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_1; 
+     phases BS;
+     from "node_1";
+     to "tnode_1";
+     configuration "7575B";
+}
+object triplex_node {
+     name "tnode_1";
+     nominal_voltage 120;
+     phases BS;
+
+}
+
+//Step3
+     // Converted from load: 3890.0+974.9j
+object recorder {
+     name "Recorder1";
+     parent "meter_1";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price,first_tier_price,price_base;
+     file strom/strom_1.csv;
+}
+object triplex_line { 
+     name "tline_1";  
+     phases BS;
+     from "tnode_1";
+     to "meter_1";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_1";
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     monthly_fee 30;
+     phases BS;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_1";
+  name "house_1";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+
+  	
+  object ZIPload {
+         name "house1_load";
+         base_power LOAD1_player.value;
+  };
+
+  }
+
+object player {
+name LOAD1_player;
+file player/Load_profile_1.player;
+}
+
+object node {
+phases ABC;
+name "node_2";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_2; 
+     phases BS;
+     from "node_2";
+     to "tnode_2";
+     configuration "7575B";
+}
+object triplex_node {
+     name "tnode_2";
+     nominal_voltage 120;
+     phases BS;
+
+}
+
+//Step3
+     // Converted from load: 5840.0+1463.6j
+object recorder {
+     name "Recorder2";
+     parent "meter_2";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_2.csv;
+}
+object triplex_line { 
+     name "tline_2";  
+     phases BS;
+     from "tnode_2";
+     to "meter_2";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_2";
+     phases BS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_2";
+  name "house_2";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house2_load";
+         base_power LOAD2_player.value;
+  };
+
+  }
+
+object player {
+name LOAD2_player;
+file player/Load_profile_2.player;
+}
+
+object node {
+phases ABC;
+name "node_3";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_3; 
+     phases CS;
+     from "node_3";
+     to "tnode_3";
+     configuration "7575C";
+}
+object triplex_node {
+     name "tnode_3";
+     nominal_voltage 120;
+     phases CS;
+
+}
+
+//Step3
+     // Converted from load: 6100.0+1528.8j
+object recorder {
+     name "Recorder3";
+     parent "meter_3";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_3.csv;
+}
+object triplex_line { 
+     name "tline_3";  
+     phases CS;
+     from "tnode_3";
+     to "meter_3";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_3";
+     phases CS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_3";
+  name "house_3";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house3_load";
+         base_power LOAD3_player.value;
+  };
+
+  }
+
+object player {
+name LOAD3_player;
+file player/Load_profile_3.player;
+}
+
+object node {
+phases ABC;
+name "node_4";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_4; 
+     phases CS;
+     from "node_4";
+     to "tnode_4";
+     configuration "7575C";
+}
+object triplex_node {
+     name "tnode_4";
+     nominal_voltage 120;
+     phases CS;
+
+}
+
+//Step3
+     // Converted from load: 6100.0+1528.8j
+object recorder {
+     name "Recorder4";
+     parent "meter_4";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_4.csv;
+}
+object triplex_line { 
+     name "tline_4";  
+     phases CS;
+     from "tnode_4";
+     to "meter_4";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_4";
+     phases CS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_4";
+  name "house_4";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house4_load";
+         base_power LOAD4_player.value;
+  };
+
+  }
+
+object player {
+name LOAD4_player;
+file player/Load_profile_4.player;
+}
+
+object node {
+phases ABC;
+name "node_5";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_5; 
+     phases AS;
+     from "node_5";
+     to "tnode_5";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_5";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 5320.0+1333.3j
+object recorder {
+     name "Recorder5";
+     parent "meter_5";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_5.csv;
+}
+object triplex_line { 
+     name "tline_5";  
+     phases AS;
+     from "tnode_5";
+     to "meter_5";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_5";
+     phases AS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_5";
+  name "house_5";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house5_load";
+         base_power LOAD5_player.value;
+  };
+
+  }
+
+object player {
+name LOAD5_player;
+file player/Load_profile_5.player;
+}
+
+object node {
+phases ABC;
+name "node_6";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_6; 
+     phases AS;
+     from "node_6";
+     to "tnode_6";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_6";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 17740.0+4446.1j
+object recorder {
+     name "Recorder6";
+     parent "meter_6";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_6.csv;
+}
+object triplex_line { 
+     name "tline_6";  
+     phases AS;
+     from "tnode_6";
+     to "meter_6";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_6";
+     phases AS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_6";
+  name "house_6";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house6_load";
+         base_power LOAD6_player.value;
+  };
+
+  }
+
+object player {
+name LOAD6_player;
+file player/Load_profile_6.player;
+}
+
+object node {
+phases ABC;
+name "node_7";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_7; 
+     phases BS;
+     from "node_7";
+     to "tnode_7";
+     configuration "7575B";
+}
+object triplex_node {
+     name "tnode_7";
+     nominal_voltage 120;
+     phases BS;
+
+}
+
+//Step3
+     // Converted from load: 9730.0+2438.6j
+object recorder {
+     name "Recorder7";
+     parent "meter_7";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_7.csv;
+}
+object triplex_line { 
+     name "tline_7";  
+     phases BS;
+     from "tnode_7";
+     to "meter_7";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_7";
+     phases BS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_7";
+  name "house_7";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house7_load";
+         base_power LOAD7_player.value;
+  };
+
+  }
+
+object player {
+name LOAD7_player;
+file player/Load_profile_7.player;
+}
+
+object node {
+phases ABC;
+name "node_8";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_8; 
+     phases AS;
+     from "node_8";
+     to "tnode_8";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_8";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 8870.0+2223.0j
+object recorder {
+     name "Recorder8";
+     parent "meter_8";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_8.csv;
+}
+object triplex_line { 
+     name "tline_8";  
+     phases AS;
+     from "tnode_8";
+     to "meter_8";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_8";
+     phases AS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_8";
+  name "house_8";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+
+  object ZIPload {
+         name "house8_load";
+         base_power LOAD8_player.value;
+  };
+
+  }
+
+object player {
+name LOAD8_player;
+file player/Load_profile_8.player;
+}
+
+object node {
+phases ABC;
+name "node_9";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_9; 
+     phases BS;
+     from "node_9";
+     to "tnode_9";
+     configuration "7575B";
+}
+object triplex_node {
+     name "tnode_9";
+     nominal_voltage 120;
+     phases BS;
+
+}
+
+//Step3
+     // Converted from load: 5840.0+1463.6j
+object recorder {
+     name "Recorder9";
+     parent "meter_9";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_9.csv;
+}
+object triplex_line { 
+     name "tline_9";  
+     phases BS;
+     from "tnode_9";
+     to "meter_9";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_9";
+     phases BS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_9";
+  name "house_9";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house9_load";
+         base_power LOAD9_player.value;
+  };
+
+  }
+
+object player {
+name LOAD9_player;
+file player/Load_profile_9.player;
+}
+
+object node {
+phases ABC;
+name "node_10";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_10; 
+     phases AS;
+     from "node_10";
+     to "tnode_10";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_10";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 3550.0+889.7j
+object recorder {
+     name "Recorder10";
+     parent "meter_10";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_10.csv;
+}
+object triplex_line { 
+     name "tline_10";  
+     phases AS;
+     from "tnode_10";
+     to "meter_10";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_10";
+     phases AS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_10";
+  name "house_10";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house10_load";
+         base_power LOAD10_player.value;
+  };
+
+  }
+
+object player {
+name LOAD10_player;
+file player/Load_profile_10.player;
+}
+
+object node {
+phases ABC;
+name "node_11";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_11; 
+     phases CS;
+     from "node_11";
+     to "tnode_11";
+     configuration "7575C";
+}
+object triplex_node {
+     name "tnode_11";
+     nominal_voltage 120;
+     phases CS;
+
+}
+
+//Step3
+     // Converted from load: 10170.0+2548.8j
+object recorder {
+     name "Recorder11";
+     parent "meter_11";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_11.csv;
+}
+object triplex_line { 
+     name "tline_11";  
+     phases CS;
+     from "tnode_11";
+     to "meter_11";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_11";
+     phases CS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_11";
+  name "house_11";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house11_load";
+         base_power LOAD11_player.value;
+  };
+
+  }
+
+object player {
+name LOAD11_player;
+file player/Load_profile_11.player;
+}
+
+object node {
+phases ABC;
+name "node_12";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_12; 
+     phases CS;
+     from "node_12";
+     to "tnode_12";
+     configuration "7575C";
+}
+object triplex_node {
+     name "tnode_12";
+     nominal_voltage 120;
+     phases CS;
+
+}
+
+//Step3
+     // Converted from load: 4070.0+1020.0j
+object recorder {
+     name "Recorder12";
+     parent "meter_12";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_12.csv;
+}
+object triplex_line { 
+     name "tline_12";  
+     phases CS;
+     from "tnode_12";
+     to "meter_12";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_12";
+     phases CS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_12";
+  name "house_12";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house12_load";
+         base_power LOAD12_player.value;
+  };
+
+  }
+
+object player {
+name LOAD12_player;
+file player/Load_profile_12.player;
+}
+
+object node {
+phases ABC;
+name "node_13";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_13; 
+     phases CS;
+     from "node_13";
+     to "tnode_13";
+     configuration "7575C";
+}
+object triplex_node {
+     name "tnode_13";
+     nominal_voltage 120;
+     phases CS;
+
+}
+
+//Step3
+     // Converted from load: 6100.0+1528.8j
+object recorder {
+     name "Recorder13";
+     parent "meter_13";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_13.csv;
+}
+object triplex_line { 
+     name "tline_13";  
+     phases CS;
+     from "tnode_13";
+     to "meter_13";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_13";
+     phases CS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_13";
+  name "house_13";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house13_load";
+         base_power LOAD13_player.value;
+  };
+
+  }
+
+object player {
+name LOAD13_player;
+file player/Load_profile_13.player;
+}
+
+object node {
+phases ABC;
+name "node_14";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_14; 
+     phases CS;
+     from "node_14";
+     to "tnode_14";
+     configuration "7575C";
+}
+object triplex_node {
+     name "tnode_14";
+     nominal_voltage 120;
+     phases CS;
+
+}
+
+//Step3
+     // Converted from load: 6100.0+1528.8j
+object recorder {
+     name "Recorder14";
+     parent "meter_14";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_14.csv;
+}
+object triplex_line { 
+     name "tline_14";  
+     phases CS;
+     from "tnode_14";
+     to "meter_14";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_14";
+     phases CS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_14";
+  name "house_14";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house14_load";
+         base_power LOAD14_player.value;
+  };
+
+  }
+
+object player {
+name LOAD14_player;
+file player/Load_profile_14.player;
+}
+
+object node {
+phases ABC;
+name "node_15";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_15; 
+     phases CS;
+     from "node_15";
+     to "tnode_15";
+     configuration "7575C";
+}
+object triplex_node {
+     name "tnode_15";
+     nominal_voltage 120;
+     phases CS;
+
+}
+
+//Step3
+     // Converted from load: 4070.0+1020.0j
+object recorder {
+     name "Recorder15";
+     parent "meter_15";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_15.csv;
+}
+object triplex_line { 
+     name "tline_15";  
+     phases CS;
+     from "tnode_15";
+     to "meter_15";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_15";
+     phases CS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_15";
+  name "house_15";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house15_load";
+         base_power LOAD15_player.value;
+  };
+
+  }
+
+object player {
+name LOAD15_player;
+file player/Load_profile_15.player;
+}
+
+object node {
+phases ABC;
+name "node_16";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_16; 
+     phases CS;
+     from "node_16";
+     to "tnode_16";
+     configuration "7575C";
+}
+object triplex_node {
+     name "tnode_16";
+     nominal_voltage 120;
+     phases CS;
+
+}
+
+//Step3
+     // Converted from load: 6100.0+1528.8j
+object recorder {
+     name "Recorder16";
+     parent "meter_16";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_16.csv;
+}
+object triplex_line { 
+     name "tline_16";  
+     phases CS;
+     from "tnode_16";
+     to "meter_16";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_16";
+     phases CS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_16";
+  name "house_16";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house16_load";
+         base_power LOAD16_player.value;
+  };
+
+  }
+
+object player {
+name LOAD16_player;
+file player/Load_profile_16.player;
+}
+
+object node {
+phases ABC;
+name "node_17";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_17; 
+     phases CS;
+     from "node_17";
+     to "tnode_17";
+     configuration "7575C";
+}
+object triplex_node {
+     name "tnode_17";
+     nominal_voltage 120;
+     phases CS;
+
+}
+
+//Step3
+     // Converted from load: 10170.0+2548.8j
+object recorder {
+     name "Recorder17";
+     parent "meter_17";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_17.csv;
+}
+object triplex_line { 
+     name "tline_17";  
+     phases CS;
+     from "tnode_17";
+     to "meter_17";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_17";
+     phases CS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_17";
+  name "house_17";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house17_load";
+         base_power LOAD17_player.value;
+  };
+
+  }
+
+object player {
+name LOAD17_player;
+file player/Load_profile_17.player;
+}
+
+object node {
+phases ABC;
+name "node_18";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_18; 
+     phases CS;
+     from "node_18";
+     to "tnode_18";
+     configuration "7575C";
+}
+object triplex_node {
+     name "tnode_18";
+     nominal_voltage 120;
+     phases CS;
+
+}
+
+//Step3
+     // Converted from load: 10170.0+2548.8j
+object recorder {
+     name "Recorder18";
+     parent "meter_18";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_18.csv;
+}
+object triplex_line { 
+     name "tline_18";  
+     phases CS;
+     from "tnode_18";
+     to "meter_18";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_18";
+     phases CS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_18";
+  name "house_18";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house18_load";
+         base_power LOAD18_player.value;
+  };
+
+  }
+
+object player {
+name LOAD18_player;
+file player/Load_profile_18.player;
+}
+
+object node {
+phases ABC;
+name "node_19";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_19; 
+     phases CS;
+     from "node_19";
+     to "tnode_19";
+     configuration "7575C";
+}
+object triplex_node {
+     name "tnode_19";
+     nominal_voltage 120;
+     phases CS;
+
+}
+
+//Step3
+     // Converted from load: 4070.0+1020.0j
+object recorder {
+     name "Recorder19";
+     parent "meter_19";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_19.csv;
+}
+object triplex_line { 
+     name "tline_19";  
+     phases CS;
+     from "tnode_19";
+     to "meter_19";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_19";
+     phases CS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_19";
+  name "house_19";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house19_load";
+         base_power LOAD19_player.value;
+  };
+
+  }
+
+object player {
+name LOAD19_player;
+file player/Load_profile_19.player;
+}
+
+object node {
+phases ABC;
+name "node_20";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_20; 
+     phases CS;
+     from "node_20";
+     to "tnode_20";
+     configuration "7575C";
+}
+object triplex_node {
+     name "tnode_20";
+     nominal_voltage 120;
+     phases CS;
+
+}
+
+//Step3
+     // Converted from load: 10170.0+2548.8j
+object recorder {
+     name "Recorder20";
+     parent "meter_20";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_20.csv;
+}
+object triplex_line { 
+     name "tline_20";  
+     phases CS;
+     from "tnode_20";
+     to "meter_20";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_20";
+     phases CS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_20";
+  name "house_20";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house20_load";
+         base_power LOAD20_player.value;
+  };
+
+  }
+
+object player {
+name LOAD20_player;
+file player/Load_profile_20.player;
+}
+
+object node {
+phases ABC;
+name "node_21";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_21; 
+     phases CS;
+     from "node_21";
+     to "tnode_21";
+     configuration "7575C";
+}
+object triplex_node {
+     name "tnode_21";
+     nominal_voltage 120;
+     phases CS;
+
+}
+
+//Step3
+     // Converted from load: 15260.0+3824.5j
+object recorder {
+     name "Recorder21";
+     parent "meter_21";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_21.csv;
+}
+object triplex_line { 
+     name "tline_21";  
+     phases CS;
+     from "tnode_21";
+     to "meter_21";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_21";
+     phases CS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_21";
+  name "house_21";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house21_load";
+         base_power LOAD21_player.value;
+  };
+
+  }
+
+object player {
+name LOAD21_player;
+file player/Load_profile_21.player;
+}
+
+object node {
+phases ABC;
+name "node_22";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_22; 
+     phases CS;
+     from "node_22";
+     to "tnode_22";
+     configuration "7575C";
+}
+object triplex_node {
+     name "tnode_22";
+     nominal_voltage 120;
+     phases CS;
+
+}
+
+//Step3
+     // Converted from load: 6100.0+1528.8j
+object recorder {
+     name "Recorder22";
+     parent "meter_22";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_22.csv;
+}
+object triplex_line { 
+     name "tline_22";  
+     phases CS;
+     from "tnode_22";
+     to "meter_22";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_22";
+     phases CS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_22";
+  name "house_22";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house22_load";
+         base_power LOAD22_player.value;
+  };
+
+  }
+
+object player {
+name LOAD22_player;
+file player/Load_profile_22.player;
+}
+
+object node {
+phases ABC;
+name "node_23";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_23; 
+     phases CS;
+     from "node_23";
+     to "tnode_23";
+     configuration "7575C";
+}
+object triplex_node {
+     name "tnode_23";
+     nominal_voltage 120;
+     phases CS;
+
+}
+
+//Step3
+     // Converted from load: 6100.0+1528.8j
+object recorder {
+     name "Recorder23";
+     parent "meter_23";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_23.csv;
+}
+object triplex_line { 
+     name "tline_23";  
+     phases CS;
+     from "tnode_23";
+     to "meter_23";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_23";
+     phases CS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_23";
+  name "house_23";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house23_load";
+         base_power LOAD23_player.value;
+  };
+
+  }
+
+object player {
+name LOAD23_player;
+file player/Load_profile_23.player;
+}
+
+object node {
+phases ABC;
+name "node_24";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_24; 
+     phases CS;
+     from "node_24";
+     to "tnode_24";
+     configuration "7575C";
+}
+object triplex_node {
+     name "tnode_24";
+     nominal_voltage 120;
+     phases CS;
+
+}
+
+//Step3
+     // Converted from load: 4070.0+1020.0j
+object recorder {
+     name "Recorder24";
+     parent "meter_24";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_24.csv;
+}
+object triplex_line { 
+     name "tline_24";  
+     phases CS;
+     from "tnode_24";
+     to "meter_24";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_24";
+     phases CS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_24";
+  name "house_24";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house24_load";
+         base_power LOAD24_player.value;
+  };
+
+  }
+
+object player {
+name LOAD24_player;
+file player/Load_profile_24.player;
+}
+
+object node {
+phases ABC;
+name "node_25";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_25; 
+     phases CS;
+     from "node_25";
+     to "tnode_25";
+     configuration "7575C";
+}
+object triplex_node {
+     name "tnode_25";
+     nominal_voltage 120;
+     phases CS;
+
+}
+
+//Step3
+     // Converted from load: 4070.0+1020.0j
+object recorder {
+     name "Recorder25";
+     parent "meter_25";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_25.csv;
+}
+object triplex_line { 
+     name "tline_25";  
+     phases CS;
+     from "tnode_25";
+     to "meter_25";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_25";
+     phases CS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_25";
+  name "house_25";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house25_load";
+         base_power LOAD25_player.value;
+  };
+
+  }
+
+object player {
+name LOAD25_player;
+file player/Load_profile_25.player;
+}
+
+object node {
+phases ABC;
+name "node_26";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_26; 
+     phases CS;
+     from "node_26";
+     to "tnode_26";
+     configuration "7575C";
+}
+object triplex_node {
+     name "tnode_26";
+     nominal_voltage 120;
+     phases CS;
+
+}
+
+//Step3
+     // Converted from load: 4070.0+1020.0j
+object recorder {
+     name "Recorder26";
+     parent "meter_26";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_26.csv;
+}
+object triplex_line { 
+     name "tline_26";  
+     phases CS;
+     from "tnode_26";
+     to "meter_26";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_26";
+     phases CS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_26";
+  name "house_26";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house26_load";
+         base_power LOAD26_player.value;
+  };
+
+  }
+
+object player {
+name LOAD26_player;
+file player/Load_profile_26.player;
+}
+
+object node {
+phases ABC;
+name "node_27";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_27; 
+     phases CS;
+     from "node_27";
+     to "tnode_27";
+     configuration "7575C";
+}
+object triplex_node {
+     name "tnode_27";
+     nominal_voltage 120;
+     phases CS;
+
+}
+
+//Step3
+     // Converted from load: 10170.0+2548.8j
+object recorder {
+     name "Recorder27";
+     parent "meter_27";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_27.csv;
+}
+object triplex_line { 
+     name "tline_27";  
+     phases CS;
+     from "tnode_27";
+     to "meter_27";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_27";
+     phases CS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_27";
+  name "house_27";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house27_load";
+         base_power LOAD27_player.value;
+  };
+
+  }
+
+object player {
+name LOAD27_player;
+file player/Load_profile_27.player;
+}
+
+object node {
+phases ABC;
+name "node_28";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_28; 
+     phases CS;
+     from "node_28";
+     to "tnode_28";
+     configuration "7575C";
+}
+object triplex_node {
+     name "tnode_28";
+     nominal_voltage 120;
+     phases CS;
+
+}
+
+//Step3
+     // Converted from load: 6100.0+1528.8j
+object recorder {
+     name "Recorder28";
+     parent "meter_28";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_28.csv;
+}
+object triplex_line { 
+     name "tline_28";  
+     phases CS;
+     from "tnode_28";
+     to "meter_28";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_28";
+     phases CS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_28";
+  name "house_28";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house28_load";
+         base_power LOAD28_player.value;
+  };
+
+  }
+
+object player {
+name LOAD28_player;
+file player/Load_profile_28.player;
+}
+
+object node {
+phases ABC;
+name "node_29";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_29; 
+     phases CS;
+     from "node_29";
+     to "tnode_29";
+     configuration "7575C";
+}
+object triplex_node {
+     name "tnode_29";
+     nominal_voltage 120;
+     phases CS;
+
+}
+
+//Step3
+     // Converted from load: 4070.0+1020.0j
+object recorder {
+     name "Recorder29";
+     parent "meter_29";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_29.csv;
+}
+object triplex_line { 
+     name "tline_29";  
+     phases CS;
+     from "tnode_29";
+     to "meter_29";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_29";
+     phases CS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_29";
+  name "house_29";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house29_load";
+         base_power LOAD29_player.value;
+  };
+
+  }
+
+object player {
+name LOAD29_player;
+file player/Load_profile_29.player;
+}
+
+object node {
+phases ABC;
+name "node_30";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_30; 
+     phases CS;
+     from "node_30";
+     to "tnode_30";
+     configuration "7575C";
+}
+object triplex_node {
+     name "tnode_30";
+     nominal_voltage 120;
+     phases CS;
+
+}
+
+//Step3
+     // Converted from load: 10170.0+2548.8j
+object recorder {
+     name "Recorder30";
+     parent "meter_30";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_30.csv;
+}
+object triplex_line { 
+     name "tline_30";  
+     phases CS;
+     from "tnode_30";
+     to "meter_30";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_30";
+     phases CS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_30";
+  name "house_30";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house30_load";
+         base_power LOAD30_player.value;
+  };
+
+  }
+
+object player {
+name LOAD30_player;
+file player/Load_profile_30.player;
+}
+
+object node {
+phases ABC;
+name "node_31";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_31; 
+     phases AS;
+     from "node_31";
+     to "tnode_31";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_31";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 8870.0+2223.0j
+object recorder {
+     name "Recorder31";
+     parent "meter_31";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_31.csv;
+}
+object triplex_line { 
+     name "tline_31";  
+     phases AS;
+     from "tnode_31";
+     to "meter_31";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_31";
+     phases AS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_31";
+  name "house_31";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house31_load";
+         base_power LOAD31_player.value;
+  };
+
+  }
+
+object player {
+name LOAD31_player;
+file player/Load_profile_31.player;
+}
+
+object node {
+phases ABC;
+name "node_32";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_32; 
+     phases AS;
+     from "node_32";
+     to "tnode_32";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_32";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 8870.0+2223.0j
+object recorder {
+     name "Recorder32";
+     parent "meter_32";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_32.csv;
+}
+object triplex_line { 
+     name "tline_32";  
+     phases AS;
+     from "tnode_32";
+     to "meter_32";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_32";
+     phases AS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_32";
+  name "house_32";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house32_load";
+         base_power LOAD32_player.value;
+  };
+
+  }
+
+object player {
+name LOAD32_player;
+file player/Load_profile_32.player;
+}
+
+object node {
+phases ABC;
+name "node_33";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_33; 
+     phases AS;
+     from "node_33";
+     to "tnode_33";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_33";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 8870.0+2223.0j
+object recorder {
+     name "Recorder33";
+     parent "meter_33";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_33.csv;
+}
+object triplex_line { 
+     name "tline_33";  
+     phases AS;
+     from "tnode_33";
+     to "meter_33";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_33";
+     phases AS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_33";
+  name "house_33";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house33_load";
+         base_power LOAD33_player.value;
+  };
+
+  }
+
+object player {
+name LOAD33_player;
+file player/Load_profile_33.player;
+}
+
+object node {
+phases ABC;
+name "node_34";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_34; 
+     phases AS;
+     from "node_34";
+     to "tnode_34";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_34";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 8870.0+2223.0j
+object recorder {
+     name "Recorder34";
+     parent "meter_34";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_34.csv;
+}
+object triplex_line { 
+     name "tline_34";  
+     phases AS;
+     from "tnode_34";
+     to "meter_34";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_34";
+     phases AS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_34";
+  name "house_34";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house34_load";
+         base_power LOAD34_player.value;
+  };
+
+  }
+
+object player {
+name LOAD34_player;
+file player/Load_profile_34.player;
+}
+
+object node {
+phases ABC;
+name "node_35";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_35; 
+     phases AS;
+     from "node_35";
+     to "tnode_35";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_35";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 8870.0+2223.0j
+object recorder {
+     name "Recorder35";
+     parent "meter_35";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_35.csv;
+}
+object triplex_line { 
+     name "tline_35";  
+     phases AS;
+     from "tnode_35";
+     to "meter_35";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_35";
+     phases AS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_35";
+  name "house_35";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house35_load";
+         base_power LOAD35_player.value;
+  };
+
+  }
+
+object player {
+name LOAD35_player;
+file player/Load_profile_35.player;
+}
+
+object node {
+parent "node_37";
+phases ABC;
+name "node_36";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_36; 
+     phases AS;
+     from "node_36";
+     to "tnode_36";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_36";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 8870.0+2223.0j
+object recorder {
+     name "Recorder36";
+     parent "meter_36";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_36.csv;
+}
+object triplex_line { 
+     name "tline_36";  
+     phases AS;
+     from "tnode_36";
+     to "meter_36";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_36";
+     groupid building1;
+     phases AS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_36";
+  name "house_36";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house36_load";
+         base_power LOAD36_player.value;
+  };
+
+  }
+
+object player {
+name LOAD36_player;
+file player/Load_profile_36.player;
+}
+
+object node {
+phases ABC;
+name "node_37";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_37; 
+     phases AS;
+     from "node_37";
+     to "tnode_37";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_37";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 8870.0+2223.0j
+object recorder {
+     name "Recorder37";
+     parent "meter_37";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_37.csv;
+}
+object triplex_line { 
+     name "tline_37";  
+     phases AS;
+     from "tnode_37";
+     to "meter_37";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_37";
+     groupid building1; 
+     phases AS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_37";
+  name "house_37";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house37_load";
+         base_power LOAD37_player.value;
+  };
+
+  }
+
+object player {
+name LOAD37_player;
+file player/Load_profile_37.player;
+}
+
+object node {
+parent "node_37";
+phases ABC;
+name "node_38";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_38; 
+     phases AS;
+     from "node_38";
+     to "tnode_38";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_38";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 13300.0+3333.3j
+object recorder {
+     name "Recorder38";
+     parent "meter_38";
+     interval 1800;
+
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_38.csv;
+}
+object triplex_line { 
+     name "tline_38";  
+     phases AS;
+     from "tnode_38";
+     to "meter_38";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_38";
+     phases AS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     groupid building1; 
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_38";
+  name "house_38";
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house38_load";
+         base_power LOAD38_player.value;
+  };
+
+  }
+
+object player {
+name LOAD38_player;
+file player/Load_profile_38.player;
+}
+
+object node {
+phases ABC;
+name "node_39";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_39; 
+     phases AS;
+     from "node_39";
+     to "tnode_39";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_39";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 5320.0+1333.3j
+object recorder {
+     name "Recorder39";
+     parent "meter_39";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_39.csv;
+}
+object triplex_line { 
+     name "tline_39";  
+     phases AS;
+     from "tnode_39";
+     to "meter_39";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_39";
+     phases AS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_39";
+  name "house_39";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house39_load";
+         base_power LOAD39_player.value;
+  };
+
+  }
+
+object player {
+name LOAD39_player;
+file player/Load_profile_39.player;
+}
+
+object node {
+phases ABC;
+name "node_40";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_40; 
+     phases AS;
+     from "node_40";
+     to "tnode_40";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_40";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 5320.0+1333.3j
+object recorder {
+     name "Recorder40";
+     parent "meter_40";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_40.csv;
+}
+object triplex_line { 
+     name "tline_40";  
+     phases AS;
+     from "tnode_40";
+     to "meter_40";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_40";
+     phases AS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_40";
+  name "house_40";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house40_load";
+         base_power LOAD40_player.value;
+  };
+
+  }
+
+object player {
+name LOAD40_player;
+file player/Load_profile_40.player;
+}
+
+object node {
+parent "node_43";
+phases ABC;
+name "node_41";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_41; 
+     phases AS;
+     from "node_41";
+     to "tnode_41";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_41";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 5320.0+1333.3j
+object recorder {
+     name "Recorder41";
+     parent "meter_41";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_41.csv;
+}
+object triplex_line { 
+     name "tline_41";  
+     phases AS;
+     from "tnode_41";
+     to "meter_41";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_41";
+     groupid building2;
+     phases AS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_41";
+  name "house_41";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house41_load";
+         base_power LOAD41_player.value;
+  };
+
+  }
+
+object player {
+name LOAD41_player;
+file player/Load_profile_41.player;
+}
+
+object node {
+parent "node_43";
+phases ABC;
+name "node_42";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_42; 
+     phases AS;
+     from "node_42";
+     to "tnode_42";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_42";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 8870.0+2223.0j
+object recorder {
+     name "Recorder42";
+     parent "meter_42";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_42.csv;
+}
+object triplex_line { 
+     name "tline_42";  
+     phases AS;
+     from "tnode_42";
+     to "meter_42";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_42";
+     groupid building2;
+     phases AS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_42";
+  name "house_42";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house42_load";
+         base_power LOAD42_player.value;
+  };
+
+  }
+
+object player {
+name LOAD42_player;
+file player/Load_profile_42.player;
+}
+
+object node {
+phases ABC;
+name "node_43";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_43; 
+     phases AS;
+     from "node_43";
+     to "tnode_43";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_43";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 8870.0+2223.0j
+object recorder {
+     name "Recorder43";
+     parent "meter_43";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_43.csv;
+}
+object triplex_line { 
+     name "tline_43";  
+     phases AS;
+     from "tnode_43";
+     to "meter_43";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_43";
+     groupid building2;
+     phases AS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_43";
+  name "house_43";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house43_load";
+         base_power LOAD43_player.value;
+  };
+
+  }
+
+object player {
+name LOAD43_player;
+file player/Load_profile_43.player;
+}
+
+object node {
+phases ABC;
+name "node_44";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_44; 
+     phases AS;
+     from "node_44";
+     to "tnode_44";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_44";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 8870.0+2223.0j
+object recorder {
+     name "Recorder44";
+     parent "meter_44";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_44.csv;
+}
+object triplex_line { 
+     name "tline_44";  
+     phases AS;
+     from "tnode_44";
+     to "meter_44";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_44";
+     phases AS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_44";
+  name "house_44";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house44_load";
+         base_power LOAD44_player.value;
+  };
+
+  }
+
+object player {
+name LOAD44_player;
+file player/Load_profile_44.player;
+}
+
+object node {
+phases ABC;
+name "node_45";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_45; 
+     phases CS;
+     from "node_45";
+     to "tnode_45";
+     configuration "7575C";
+}
+object triplex_node {
+     name "tnode_45";
+     nominal_voltage 120;
+     phases CS;
+
+}
+
+//Step3
+     // Converted from load: 4070.0+1020.0j
+object recorder {
+     name "Recorder45";
+     parent "meter_45";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_45.csv;
+}
+object triplex_line { 
+     name "tline_45";  
+     phases CS;
+     from "tnode_45";
+     to "meter_45";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_45";
+     phases CS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_45";
+  name "house_45";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house45_load";
+         base_power LOAD45_player.value;
+  };
+
+  }
+
+object player {
+name LOAD45_player;
+file player/Load_profile_45.player;
+}
+
+object node {
+phases ABC;
+name "node_46";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_46; 
+     phases CS;
+     from "node_46";
+     to "tnode_46";
+     configuration "7575C";
+}
+object triplex_node {
+     name "tnode_46";
+     nominal_voltage 120;
+     phases CS;
+
+}
+
+//Step3
+     // Converted from load: 6100.0+1528.8j
+object recorder {
+     name "Recorder46";
+     parent "meter_46";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_46.csv;
+}
+object triplex_line { 
+     name "tline_46";  
+     phases CS;
+     from "tnode_46";
+     to "meter_46";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_46";
+     phases CS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_46";
+  name "house_46";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house46_load";
+         base_power LOAD46_player.value;
+  };
+
+  }
+
+object player {
+name LOAD46_player;
+file player/Load_profile_46.player;
+}
+
+object node {
+phases ABC;
+name "node_47";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_47; 
+     phases CS;
+     from "node_47";
+     to "tnode_47";
+     configuration "7575C";
+}
+object triplex_node {
+     name "tnode_47";
+     nominal_voltage 120;
+     phases CS;
+
+}
+
+//Step3
+     // Converted from load: 6100.0+1528.8j
+object recorder {
+     name "Recorder47";
+     parent "meter_47";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_47.csv;
+}
+object triplex_line { 
+     name "tline_47";  
+     phases CS;
+     from "tnode_47";
+     to "meter_47";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_47";
+     phases CS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_47";
+  name "house_47";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house47_load";
+         base_power LOAD47_player.value;
+  };
+
+  }
+
+object player {
+name LOAD47_player;
+file player/Load_profile_47.player;
+}
+
+object node {
+phases ABC;
+name "node_48";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_48; 
+     phases AS;
+     from "node_48";
+     to "tnode_48";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_48";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 5320.0+1333.3j
+object recorder {
+     name "Recorder48";
+     parent "meter_48";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_48.csv;
+}
+object triplex_line { 
+     name "tline_48";  
+     phases AS;
+     from "tnode_48";
+     to "meter_48";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_48";
+     phases AS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_48";
+  name "house_48";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house48_load";
+         base_power LOAD48_player.value;
+  };
+
+  }
+
+object player {
+name LOAD48_player;
+file player/Load_profile_48.player;
+}
+
+object node {
+phases ABC;
+name "node_49";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_49; 
+     phases AS;
+     from "node_49";
+     to "tnode_49";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_49";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 8870.0+2223.0j
+object recorder {
+     name "Recorder49";
+     parent "meter_49";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_49.csv;
+}
+object triplex_line { 
+     name "tline_49";  
+     phases AS;
+     from "tnode_49";
+     to "meter_49";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_49";
+     phases AS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_49";
+  name "house_49";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house49_load";
+         base_power LOAD49_player.value;
+  };
+
+  }
+
+object player {
+name LOAD49_player;
+file player/Load_profile_49.player;
+}
+
+object node {
+phases ABC;
+name "node_50";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_50; 
+     phases BS;
+     from "node_50";
+     to "tnode_50";
+     configuration "7575B";
+}
+object triplex_node {
+     name "tnode_50";
+     nominal_voltage 120;
+     phases BS;
+
+}
+
+//Step3
+     // Converted from load: 5840.0+1463.6j
+object recorder {
+     name "Recorder50";
+     parent "meter_50";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_50.csv;
+}
+object triplex_line { 
+     name "tline_50";  
+     phases BS;
+     from "tnode_50";
+     to "meter_50";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_50";
+     phases BS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_50";
+  name "house_50";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house50_load";
+         base_power LOAD50_player.value;
+  };
+
+  }
+
+object player {
+name LOAD50_player;
+file player/Load_profile_50.player;
+}
+
+object node {
+phases ABC;
+name "node_51";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_51; 
+     phases AS;
+     from "node_51";
+     to "tnode_51";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_51";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 3550.0+889.7j
+object recorder {
+     name "Recorder51";
+     parent "meter_51";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_51.csv;
+}
+object triplex_line { 
+     name "tline_51";  
+     phases AS;
+     from "tnode_51";
+     to "meter_51";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_51";
+     groupid building3;
+     phases AS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_51";
+  name "house_51";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house51_load";
+         base_power LOAD51_player.value;
+  };
+
+  }
+
+object player {
+name LOAD51_player;
+file player/Load_profile_51.player;
+}
+
+object node {
+parent "node_51";
+phases ABC;
+name "node_52";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_52; 
+     phases CS;
+     from "node_52";
+     to "tnode_52";
+     configuration "7575C";
+}
+object triplex_node {
+     name "tnode_52";
+     nominal_voltage 120;
+     phases CS;
+
+}
+
+//Step3
+     // Converted from load: 6100.0+1528.8j
+object recorder {
+     name "Recorder52";
+     parent "meter_52";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_52.csv;
+}
+object triplex_line { 
+     name "tline_52";  
+     phases CS;
+     from "tnode_52";
+     to "meter_52";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_52";
+     groupid building3;
+     phases CS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_52";
+  name "house_52";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house52_load";
+         base_power LOAD52_player.value;
+  };
+
+  }
+
+object player {
+name LOAD52_player;
+file player/Load_profile_52.player;
+}
+
+object node {
+parent "node_51";
+phases ABC;
+name "node_53";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_53; 
+     phases AS;
+     from "node_53";
+     to "tnode_53";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_53";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 8870.0+2223.0j
+object recorder {
+     name "Recorder53";
+     parent "meter_53";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_53.csv;
+}
+object triplex_line { 
+     name "tline_53";  
+     phases AS;
+     from "tnode_53";
+     to "meter_53";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_53";
+     groupid building3;
+     phases AS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_53";
+  name "house_53";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house53_load";
+         base_power LOAD53_player.value;
+  };
+
+  }
+
+object player {
+name LOAD53_player;
+file player/Load_profile_53.player;
+}
+
+object node {
+phases ABC;
+name "node_54";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_54; 
+     phases CS;
+     from "node_54";
+     to "tnode_54";
+     configuration "7575C";
+}
+object triplex_node {
+     name "tnode_54";
+     nominal_voltage 120;
+     phases CS;
+
+}
+
+//Step3
+     // Converted from load: 4070.0+1020.0j
+object recorder {
+     name "Recorder54";
+     parent "meter_54";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_54.csv;
+}
+object triplex_line { 
+     name "tline_54";  
+     phases CS;
+     from "tnode_54";
+     to "meter_54";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_54";
+     phases CS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_54";
+  name "house_54";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house54_load";
+         base_power LOAD54_player.value;
+  };
+
+  }
+
+object player {
+name LOAD54_player;
+file player/Load_profile_54.player;
+}
+
+object node {
+phases ABC;
+name "node_55";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_55; 
+     phases CS;
+     from "node_55";
+     to "tnode_55";
+     configuration "7575C";
+}
+object triplex_node {
+     name "tnode_55";
+     nominal_voltage 120;
+     phases CS;
+
+}
+
+//Step3
+     // Converted from load: 10170.0+2548.8j
+object recorder {
+     name "Recorder55";
+     parent "meter_55";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_55.csv;
+}
+object triplex_line { 
+     name "tline_55";  
+     phases CS;
+     from "tnode_55";
+     to "meter_55";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_55";
+     phases CS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_55";
+  name "house_55";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house55_load";
+         base_power LOAD55_player.value;
+  };
+
+  }
+
+object player {
+name LOAD55_player;
+file player/Load_profile_55.player;
+}
+
+object node {
+phases ABC;
+name "node_56";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_56; 
+     phases CS;
+     from "node_56";
+     to "tnode_56";
+     configuration "7575C";
+}
+object triplex_node {
+     name "tnode_56";
+     nominal_voltage 120;
+     phases CS;
+
+}
+
+//Step3
+     // Converted from load: 15260.0+3824.5j
+object recorder {
+     name "Recorder56";
+     parent "meter_56";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_56.csv;
+}
+object triplex_line { 
+     name "tline_56";  
+     phases CS;
+     from "tnode_56";
+     to "meter_56";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_56";
+     phases CS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_56";
+  name "house_56";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house56_load";
+         base_power LOAD56_player.value;
+  };
+
+  }
+
+object player {
+name LOAD56_player;
+file player/Load_profile_56.player;
+}
+
+object node {
+phases ABC;
+name "node_57";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_57; 
+     phases AS;
+     from "node_57";
+     to "tnode_57";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_57";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 5320.0+1333.3j
+object recorder {
+     name "Recorder57";
+     parent "meter_57";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_57.csv;
+}
+object triplex_line { 
+     name "tline_57";  
+     phases AS;
+     from "tnode_57";
+     to "meter_57";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_57";
+     phases AS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_57";
+  name "house_57";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house57_load";
+         base_power LOAD57_player.value;
+  };
+
+  }
+
+object player {
+name LOAD57_player;
+file player/Load_profile_57.player;
+}
+
+object node {
+phases ABC;
+name "node_58";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_58; 
+     phases AS;
+     from "node_58";
+     to "tnode_58";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_58";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 5320.0+1333.3j
+object recorder {
+     name "Recorder58";
+     parent "meter_58";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_58.csv;
+}
+object triplex_line { 
+     name "tline_58";  
+     phases AS;
+     from "tnode_58";
+     to "meter_58";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_58";
+     phases AS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_58";
+  name "house_58";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house58_load";
+         base_power LOAD58_player.value;
+  };
+
+  }
+
+object player {
+name LOAD58_player;
+file player/Load_profile_58.player;
+}
+
+object node {
+phases ABC;
+name "node_59";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_59; 
+     phases AS;
+     from "node_59";
+     to "tnode_59";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_59";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 8870.0+2223.0j
+object recorder {
+     name "Recorder59";
+     parent "meter_59";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_59.csv;
+}
+object triplex_line { 
+     name "tline_59";  
+     phases AS;
+     from "tnode_59";
+     to "meter_59";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_59";
+     phases AS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_59";
+  name "house_59";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house59_load";
+         base_power LOAD59_player.value;
+  };
+
+  }
+
+object player {
+name LOAD59_player;
+file player/Load_profile_59.player;
+}
+
+object node {
+phases ABC;
+name "node_60";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_60; 
+     phases AS;
+     from "node_60";
+     to "tnode_60";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_60";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 8870.0+2223.0j
+object recorder {
+     name "Recorder60";
+     parent "meter_60";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_60.csv;
+}
+object triplex_line { 
+     name "tline_60";  
+     phases AS;
+     from "tnode_60";
+     to "meter_60";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_60";
+     phases AS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_60";
+  name "house_60";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house60_load";
+         base_power LOAD60_player.value;
+  };
+
+  }
+
+object player {
+name LOAD60_player;
+file player/Load_profile_60.player;
+}
+
+object node {
+phases ABC;
+name "node_61";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_61; 
+     phases AS;
+     from "node_61";
+     to "tnode_61";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_61";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 5320.0+1333.3j
+object recorder {
+     name "Recorder61";
+     parent "meter_61";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_61.csv;
+}
+object triplex_line { 
+     name "tline_61";  
+     phases AS;
+     from "tnode_61";
+     to "meter_61";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_61";
+     phases AS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_61";
+  name "house_61";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house61_load";
+         base_power LOAD61_player.value;
+  };
+
+  }
+
+object player {
+name LOAD61_player;
+file player/Load_profile_61.player;
+}
+
+object node {
+phases ABC;
+name "node_62";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_62; 
+     phases CS;
+     from "node_62";
+     to "tnode_62";
+     configuration "7575C";
+}
+object triplex_node {
+     name "tnode_62";
+     nominal_voltage 120;
+     phases CS;
+
+}
+
+//Step3
+     // Converted from load: 10170.0+2548.8j
+object recorder {
+     name "Recorder62";
+     parent "meter_62";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_62.csv;
+}
+object triplex_line { 
+     name "tline_62";  
+     phases CS;
+     from "tnode_62";
+     to "meter_62";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_62";
+     phases CS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_62";
+  name "house_62";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house62_load";
+         base_power LOAD62_player.value;
+  };
+
+  }
+
+object player {
+name LOAD62_player;
+file player/Load_profile_62.player;
+}
+
+object node {
+phases ABC;
+name "node_63";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_63; 
+     phases CS;
+     from "node_63";
+     to "tnode_63";
+     configuration "7575C";
+}
+object triplex_node {
+     name "tnode_63";
+     nominal_voltage 120;
+     phases CS;
+
+}
+
+//Step3
+     // Converted from load: 10170.0+2548.8j
+object recorder {
+     name "Recorder63";
+     parent "meter_63";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_63.csv;
+}
+object triplex_line { 
+     name "tline_63";  
+     phases CS;
+     from "tnode_63";
+     to "meter_63";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_63";
+     phases CS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_63";
+  name "house_63";
+
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house63_load";
+         base_power LOAD63_player.value;
+  };
+
+  }
+
+object player {
+name LOAD63_player;
+file player/Load_profile_63.player;
+}
+
+object node {
+phases ABC;
+name "node_64";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_64; 
+     phases CS;
+     from "node_64";
+     to "tnode_64";
+     configuration "7575C";
+}
+object triplex_node {
+     name "tnode_64";
+     nominal_voltage 120;
+     phases CS;
+
+}
+
+//Step3
+     // Converted from load: 10170.0+2548.8j
+object recorder {
+     name "Recorder64";
+     parent "meter_64";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_64.csv;
+}
+object triplex_line { 
+     name "tline_64";  
+     phases CS;
+     from "tnode_64";
+     to "meter_64";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_64";
+     phases CS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_64";
+  name "house_64";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house64_load";
+         base_power LOAD64_player.value;
+  };
+
+  }
+
+object player {
+name LOAD64_player;
+file player/Load_profile_64.player;
+}
+
+object node {
+phases ABC;
+name "node_65";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_65; 
+     phases AS;
+     from "node_65";
+     to "tnode_65";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_65";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 8870.0+2223.0j
+object recorder {
+     name "Recorder65";
+     parent "meter_65";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_65.csv;
+}
+object triplex_line { 
+     name "tline_65";  
+     phases AS;
+     from "tnode_65";
+     to "meter_65";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_65";
+     phases AS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_65";
+  name "house_65";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house65_load";
+         base_power LOAD65_player.value;
+  };
+
+  }
+
+object player {
+name LOAD65_player;
+file player/Load_profile_65.player;
+}
+
+object node {
+phases ABC;
+name "node_66";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_66; 
+     phases AS;
+     from "node_66";
+     to "tnode_66";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_66";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 8870.0+2223.0j
+object recorder {
+     name "Recorder66";
+     parent "meter_66";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_66.csv;
+}
+object triplex_line { 
+     name "tline_66";  
+     phases AS;
+     from "tnode_66";
+     to "meter_66";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_66";
+     groupid building4;
+     phases AS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_66";
+  name "house_66";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house66_load";
+         base_power LOAD66_player.value;
+  };
+
+  }
+
+object player {
+name LOAD66_player;
+file player/Load_profile_66.player;
+}
+
+object node {
+parent "node_66";
+phases ABC;
+name "node_67";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_67; 
+     phases BS;
+     from "node_67";
+     to "tnode_67";
+     configuration "7575B";
+}
+object triplex_node {
+     name "tnode_67";
+     nominal_voltage 120;
+     phases BS;
+
+}
+
+//Step3
+     // Converted from load: 9730.0+2438.6j
+object recorder {
+     name "Recorder67";
+     parent "meter_67";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_67.csv;
+}
+object triplex_line { 
+     name "tline_67";  
+     phases BS;
+     from "tnode_67";
+     to "meter_67";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_67";
+     groupid building4;
+     phases BS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_67";
+  name "house_67";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house67_load";
+         base_power LOAD67_player.value;
+  };
+
+  }
+
+object player {
+name LOAD67_player;
+file player/Load_profile_67.player;
+}
+
+object node {
+parent "node_66";
+phases ABC;
+name "node_68";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_68; 
+     phases BS;
+     from "node_68";
+     to "tnode_68";
+     configuration "7575B";
+}
+object triplex_node {
+     name "tnode_68";
+     nominal_voltage 120;
+     phases BS;
+
+}
+
+//Step3
+     // Converted from load: 5840.0+1463.6j
+object recorder {
+     name "Recorder68";
+     parent "meter_68";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_68.csv;
+}
+object triplex_line { 
+     name "tline_68";  
+     phases BS;
+     from "tnode_68";
+     to "meter_68";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_68";
+     groupid building4;
+     phases BS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_68";
+  name "house_68";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house68_load";
+         base_power LOAD68_player.value;
+  };
+
+  }
+
+object player {
+name LOAD68_player;
+file player/Load_profile_68.player;
+}
+
+object node {
+parent "node_66";
+phases ABC;
+name "node_69";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_69; 
+     phases BS;
+     from "node_69";
+     to "tnode_69";
+     configuration "7575B";
+}
+object triplex_node {
+     name "tnode_69";
+     nominal_voltage 120;
+     phases BS;
+
+}
+
+//Step3
+     // Converted from load: 9730.0+2438.6j
+object recorder {
+     name "Recorder69";
+     parent "meter_69";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_69.csv;
+}
+object triplex_line { 
+     name "tline_69";  
+     phases BS;
+     from "tnode_69";
+     to "meter_69";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_69";
+     groupid building4;
+     phases BS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_69";
+  name "house_69";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house69_load";
+         base_power LOAD69_player.value;
+  };
+
+  }
+
+object player {
+name LOAD69_player;
+file player/Load_profile_69.player;
+}
+
+object node {
+phases ABC;
+name "node_70";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_70; 
+     phases BS;
+     from "node_70";
+     to "tnode_70";
+     configuration "7575B";
+}
+object triplex_node {
+     name "tnode_70";
+     nominal_voltage 120;
+     phases BS;
+
+}
+
+//Step3
+     // Converted from load: 14590.0+3656.6j
+object recorder {
+     name "Recorder70";
+     parent "meter_70";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_70.csv;
+}
+object triplex_line { 
+     name "tline_70";  
+     phases BS;
+     from "tnode_70";
+     to "meter_70";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_70";
+     groupid building5;
+     phases BS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_70";
+  name "house_70";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house70_load";
+         base_power LOAD70_player.value;
+  };
+
+  }
+
+object player {
+name LOAD70_player;
+file player/Load_profile_70.player;
+}
+
+object node {
+parent "node_70";
+phases ABC;
+name "node_71";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_71; 
+     phases BS;
+     from "node_71";
+     to "tnode_71";
+     configuration "7575B";
+}
+object triplex_node {
+     name "tnode_71";
+     nominal_voltage 120;
+     phases BS;
+
+}
+
+//Step3
+     // Converted from load: 3890.0+974.9j
+object recorder {
+     name "Recorder71";
+     parent "meter_71";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_71.csv;
+}
+object triplex_line { 
+     name "tline_71";  
+     phases BS;
+     from "tnode_71";
+     to "meter_71";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_71";
+     groupid building5;
+     phases BS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_71";
+  name "house_71";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house71_load";
+         base_power LOAD71_player.value;
+  };
+
+  }
+
+object player {
+name LOAD71_player;
+file player/Load_profile_71.player;
+}
+
+object node {
+parent "node_70";
+phases ABC;
+name "node_72";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_72; 
+     phases AS;
+     from "node_72";
+     to "tnode_72";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_72";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 3550.0+889.7j
+object recorder {
+     name "Recorder72";
+     parent "meter_72";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_72.csv;
+}
+object triplex_line { 
+     name "tline_72";  
+     phases AS;
+     from "tnode_72";
+     to "meter_72";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_72";
+     groupid building5;
+     phases AS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_72";
+  name "house_72";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house72_load";
+         base_power LOAD72_player.value;
+  };
+
+  }
+
+object player {
+name LOAD72_player;
+file player/Load_profile_72.player;
+}
+
+object node {
+parent "node_70";
+phases ABC;
+name "node_73";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_73; 
+     phases AS;
+     from "node_73";
+     to "tnode_73";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_73";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 3550.0+889.7j
+object recorder {
+     name "Recorder73";
+     parent "meter_73";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_73.csv;
+}
+object triplex_line { 
+     name "tline_73";  
+     phases AS;
+     from "tnode_73";
+     to "meter_73";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_73";
+     groupid building5;
+     phases AS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_73";
+  name "house_73";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house73_load";
+         base_power LOAD73_player.value;
+  };
+
+  }
+
+object player {
+name LOAD73_player;
+file player/Load_profile_73.player;
+}
+
+object node {
+phases ABC;
+name "node_74";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_74; 
+     phases AS;
+     from "node_74";
+     to "tnode_74";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_74";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 5320.0+1333.3j
+object recorder {
+     name "Recorder74";
+     parent "meter_74";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_74.csv;
+}
+object triplex_line { 
+     name "tline_74";  
+     phases AS;
+     from "tnode_74";
+     to "meter_74";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_74";
+     phases AS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_74";
+  name "house_74";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house74_load";
+         base_power LOAD74_player.value;
+  };
+
+  }
+
+object player {
+name LOAD74_player;
+file player/Load_profile_74.player;
+}
+
+object node {
+phases ABC;
+name "node_75";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_75; 
+     phases CS;
+     from "node_75";
+     to "tnode_75";
+     configuration "7575C";
+}
+object triplex_node {
+     name "tnode_75";
+     nominal_voltage 120;
+     phases CS;
+
+}
+
+//Step3
+     // Converted from load: 6100.0+1528.8j
+object recorder {
+     name "Recorder75";
+     parent "meter_75";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_75.csv;
+}
+object triplex_line { 
+     name "tline_75";  
+     phases CS;
+     from "tnode_75";
+     to "meter_75";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_75";
+     phases CS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_75";
+  name "house_75";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house75_load";
+         base_power LOAD75_player.value;
+  };
+
+  }
+
+object player {
+name LOAD75_player;
+file player/Load_profile_75.player;
+}
+
+object node {
+phases ABC;
+name "node_76";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_76; 
+     phases BS;
+     from "node_76";
+     to "tnode_76";
+     configuration "7575B";
+}
+object triplex_node {
+     name "tnode_76";
+     nominal_voltage 120;
+     phases BS;
+
+}
+
+//Step3
+     // Converted from load: 5840.0+1463.6j
+object recorder {
+     name "Recorder76";
+     parent "meter_76";
+     groupid building6;
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_76.csv;
+}
+object triplex_line { 
+     name "tline_76";  
+     phases BS;
+     from "tnode_76";
+     to "meter_76";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_76";
+     phases BS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_76";
+  name "house_76";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house76_load";
+         base_power LOAD76_player.value;
+  };
+
+  }
+
+object player {
+name LOAD76_player;
+file player/Load_profile_76.player;
+}
+
+object node {
+parent "node_76";
+phases ABC;
+name "node_77";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_77; 
+     phases BS;
+     from "node_77";
+     to "tnode_77";
+     configuration "7575B";
+}
+object triplex_node {
+     name "tnode_77";
+     nominal_voltage 120;
+     phases BS;
+
+}
+
+//Step3
+     // Converted from load: 14590.0+3656.6j
+object recorder {
+     name "Recorder77";
+     parent "meter_77";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_77.csv;
+}
+object triplex_line { 
+     name "tline_77";  
+     phases BS;
+     from "tnode_77";
+     to "meter_77";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_77";
+     groupid building6;
+     phases BS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_77";
+  name "house_77";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house77_load";
+         base_power LOAD77_player.value;
+  };
+
+  }
+
+object player {
+name LOAD77_player;
+file player/Load_profile_77.player;
+}
+
+object node {
+parent "node_76";
+phases ABC;
+name "node_78";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_78; 
+     phases BS;
+     from "node_78";
+     to "tnode_78";
+     configuration "7575B";
+}
+object triplex_node {
+     name "tnode_78";
+     nominal_voltage 120;
+     phases BS;
+
+}
+
+//Step3
+     // Converted from load: 5840.0+1463.6j
+object recorder {
+     name "Recorder78";
+     parent "meter_78";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_78.csv;
+}
+object triplex_line { 
+     name "tline_78";  
+     phases BS;
+     from "tnode_78";
+     to "meter_78";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_78";
+     groupid building6;
+     phases BS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_78";
+  name "house_78";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+
+  object ZIPload {
+         name "house78_load";
+         base_power LOAD78_player.value;
+  };
+
+  }
+
+object player {
+name LOAD78_player;
+file player/Load_profile_78.player;
+}
+
+object node {
+parent "node_76";
+phases ABC;
+name "node_79";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_79; 
+     phases BS;
+     from "node_79";
+     to "tnode_79";
+     configuration "7575B";
+}
+object triplex_node {
+     name "tnode_79";
+     nominal_voltage 120;
+     phases BS;
+
+}
+
+//Step3
+     // Converted from load: 3890.0+974.9j
+object recorder {
+     name "Recorder79";
+     parent "meter_79";
+     
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_79.csv;
+}
+object triplex_line { 
+     name "tline_79";  
+     phases BS;
+     from "tnode_79";
+     to "meter_79";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_79";
+     groupid building6;
+     phases BS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_79";
+  name "house_79";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house79_load";
+         base_power LOAD79_player.value;
+  };
+
+  }
+
+object player {
+name LOAD79_player;
+file player/Load_profile_79.player;
+}
+
+object node {
+parent "node_76";
+phases ABC;
+name "node_80";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_80; 
+     phases BS;
+     from "node_80";
+     to "tnode_80";
+     configuration "7575B";
+}
+object triplex_node {
+     name "tnode_80";
+     nominal_voltage 120;
+     phases BS;
+
+}
+
+//Step3
+     // Converted from load: 9730.0+2438.6j
+object recorder {
+     name "Recorder80";
+     parent "meter_80";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_80.csv;
+}
+object triplex_line { 
+     name "tline_80";  
+     phases BS;
+     from "tnode_80";
+     to "meter_80";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_80";
+     groupid building6;
+     phases BS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_80";
+  name "house_80";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house80_load";
+         base_power LOAD80_player.value;
+  };
+
+  }
+
+object player {
+name LOAD80_player;
+file player/Load_profile_80.player;
+}
+
+object node {
+phases ABC;
+name "node_81";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_81; 
+     phases BS;
+     from "node_81";
+     to "tnode_81";
+     configuration "7575B";
+}
+object triplex_node {
+     name "tnode_81";
+     nominal_voltage 120;
+     phases BS;
+
+}
+
+//Step3
+     // Converted from load: 5840.0+1463.6j
+object recorder {
+     name "Recorder81";
+     parent "meter_81";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_81.csv;
+}
+object triplex_line { 
+     name "tline_81";  
+     phases BS;
+     from "tnode_81";
+     to "meter_81";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_81";
+     phases BS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_81";
+  name "house_81";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house81_load";
+         base_power LOAD81_player.value;
+  };
+
+  }
+
+object player {
+name LOAD81_player;
+file player/Load_profile_81.player;
+}
+
+object node {
+phases ABC;
+name "node_82";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_82; 
+     phases BS;
+     from "node_82";
+     to "tnode_82";
+     configuration "7575B";
+}
+object triplex_node {
+     name "tnode_82";
+     nominal_voltage 120;
+     phases BS;
+
+}
+
+//Step3
+     // Converted from load: 9730.0+2438.6j
+object recorder {
+     name "Recorder82";
+     parent "meter_82";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_82.csv;
+}
+object triplex_line { 
+     name "tline_82";  
+     phases BS;
+     from "tnode_82";
+     to "meter_82";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_82";
+     phases BS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_82";
+  name "house_82";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house82_load";
+         base_power LOAD82_player.value;
+  };
+
+  }
+
+object player {
+name LOAD82_player;
+file player/Load_profile_82.player;
+}
+
+object node {
+phases ABC;
+name "node_83";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_83; 
+     phases CS;
+     from "node_83";
+     to "tnode_83";
+     configuration "7575C";
+}
+object triplex_node {
+     name "tnode_83";
+     nominal_voltage 120;
+     phases CS;
+
+}
+
+//Step3
+     // Converted from load: 4070.0+1020.0j
+object recorder {
+     name "Recorder83";
+     parent "meter_83";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_83.csv;
+}
+object triplex_line { 
+     name "tline_83";  
+     phases CS;
+     from "tnode_83";
+     to "meter_83";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_83";
+     phases CS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_83";
+  name "house_83";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house83_load";
+         base_power LOAD83_player.value;
+  };
+
+  }
+
+object player {
+name LOAD83_player;
+file player/Load_profile_83.player;
+}
+
+object node {
+phases ABC;
+name "node_84";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_84; 
+     phases BS;
+     from "node_84";
+     to "tnode_84";
+     configuration "7575B";
+}
+object triplex_node {
+     name "tnode_84";
+     nominal_voltage 120;
+     phases BS;
+
+}
+
+//Step3
+     // Converted from load: 9730.0+2438.6j
+object recorder {
+     name "Recorder84";
+     parent "meter_84";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_84.csv;
+}
+object triplex_line { 
+     name "tline_84";  
+     phases BS;
+     from "tnode_84";
+     to "meter_84";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_84";
+     phases BS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_84";
+  name "house_84";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house84_load";
+         base_power LOAD84_player.value;
+  };
+
+  }
+
+object player {
+name LOAD84_player;
+file player/Load_profile_84.player;
+}
+
+object node {
+phases ABC;
+name "node_85";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_85; 
+     phases BS;
+     from "node_85";
+     to "tnode_85";
+     configuration "7575B";
+}
+object triplex_node {
+     name "tnode_85";
+     nominal_voltage 120;
+     phases BS;
+
+}
+
+//Step3
+     // Converted from load: 3890.0+974.9j
+object recorder {
+     name "Recorder85";
+     parent "meter_85";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_85.csv;
+}
+object triplex_line { 
+     name "tline_85";  
+     phases BS;
+     from "tnode_85";
+     to "meter_85";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_85";
+     phases BS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_85";
+  name "house_85";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house85_load";
+         base_power LOAD85_player.value;
+  };
+
+  }
+
+object player {
+name LOAD85_player;
+file player/Load_profile_85.player;
+}
+
+object node {
+phases ABC;
+name "node_86";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_86; 
+     phases AS;
+     from "node_86";
+     to "tnode_86";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_86";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 8870.0+2223.0j
+object recorder {
+     name "Recorder86";
+     parent "meter_86";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_86.csv;
+}
+object triplex_line { 
+     name "tline_86";  
+     phases AS;
+     from "tnode_86";
+     to "meter_86";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_86";
+     phases AS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_86";
+  name "house_86";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house86_load";
+         base_power LOAD86_player.value;
+  };
+
+  }
+
+object player {
+name LOAD86_player;
+file player/Load_profile_86.player;
+}
+
+object node {
+phases ABC;
+name "node_87";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_87; 
+     phases CS;
+     from "node_87";
+     to "tnode_87";
+     configuration "7575C";
+}
+object triplex_node {
+     name "tnode_87";
+     nominal_voltage 120;
+     phases CS;
+
+}
+
+//Step3
+     // Converted from load: 10170.0+2548.8j
+object recorder {
+     name "Recorder87";
+     parent "meter_87";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_87.csv;
+}
+object triplex_line { 
+     name "tline_87";  
+     phases CS;
+     from "tnode_87";
+     to "meter_87";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_87";
+     phases CS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_87";
+  name "house_87";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house87_load";
+         base_power LOAD87_player.value;
+  };
+
+  }
+
+object player {
+name LOAD87_player;
+file player/Load_profile_87.player;
+}
+
+object node {
+phases ABC;
+name "node_88";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_88; 
+     phases CS;
+     from "node_88";
+     to "tnode_88";
+     configuration "7575C";
+}
+object triplex_node {
+     name "tnode_88";
+     nominal_voltage 120;
+     phases CS;
+
+}
+
+//Step3
+     // Converted from load: 6100.0+1528.8j
+object recorder {
+     name "Recorder88";
+     parent "meter_88";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_88.csv;
+}
+object triplex_line { 
+     name "tline_88";  
+     phases CS;
+     from "tnode_88";
+     to "meter_88";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_88";
+     phases CS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_88";
+  name "house_88";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house88_load";
+         base_power LOAD88_player.value;
+  };
+
+  }
+
+object player {
+name LOAD88_player;
+file player/Load_profile_88.player;
+}
+
+object node {
+phases ABC;
+name "node_89";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_89; 
+     phases AS;
+     from "node_89";
+     to "tnode_89";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_89";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 8870.0+2223.0j
+object recorder {
+     name "Recorder89";
+     parent "meter_89";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_89.csv;
+}
+object triplex_line { 
+     name "tline_89";  
+     phases AS;
+     from "tnode_89";
+     to "meter_89";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_89";
+     phases AS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_89";
+  name "house_89";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house89_load";
+         base_power LOAD89_player.value;
+  };
+
+  }
+
+object player {
+name LOAD89_player;
+file player/Load_profile_89.player;
+}
+
+object node {
+phases ABC;
+name "node_90";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_90; 
+     phases AS;
+     from "node_90";
+     to "tnode_90";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_90";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 8870.0+2223.0j
+object recorder {
+     name "Recorder90";
+     parent "meter_90";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_90.csv;
+}
+object triplex_line { 
+     name "tline_90";  
+     phases AS;
+     from "tnode_90";
+     to "meter_90";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_90";
+     phases AS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_90";
+  name "house_90";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house90_load";
+         base_power LOAD90_player.value;
+  };
+
+  }
+
+object player {
+name LOAD90_player;
+file player/Load_profile_90.player;
+}
+
+object node {
+phases ABC;
+name "node_91";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_91; 
+     phases AS;
+     from "node_91";
+     to "tnode_91";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_91";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 17740.0+4446.1j
+object recorder {
+     name "Recorder91";
+     parent "meter_91";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_91.csv;
+}
+object triplex_line { 
+     name "tline_91";  
+     phases AS;
+     from "tnode_91";
+     to "meter_91";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_91";
+     phases AS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_91";
+  name "house_91";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house91_load";
+         base_power LOAD91_player.value;
+  };
+
+  }
+
+object player {
+name LOAD91_player;
+file player/Load_profile_91.player;
+}
+
+object node {
+phases ABC;
+name "node_92";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_92; 
+     phases AS;
+     from "node_92";
+     to "tnode_92";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_92";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 3550.0+889.7j
+object recorder {
+     name "Recorder92";
+     parent "meter_92";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_92.csv;
+}
+object triplex_line { 
+     name "tline_92";  
+     phases AS;
+     from "tnode_92";
+     to "meter_92";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_92";
+     phases AS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_92";
+  name "house_92";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house92_load";
+         base_power LOAD92_player.value;
+  };
+
+  }
+
+object player {
+name LOAD92_player;
+file player/Load_profile_92.player;
+}
+
+object node {
+phases ABC;
+name "node_93";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_93; 
+     phases CS;
+     from "node_93";
+     to "tnode_93";
+     configuration "7575C";
+}
+object triplex_node {
+     name "tnode_93";
+     nominal_voltage 120;
+     phases CS;
+
+}
+
+//Step3
+     // Converted from load: 6100.0+1528.8j
+object recorder {
+     name "Recorder93";
+     parent "meter_93";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_93.csv;
+}
+object triplex_line { 
+     name "tline_93";  
+     phases CS;
+     from "tnode_93";
+     to "meter_93";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_93";
+     phases CS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_93";
+  name "house_93";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house93_load";
+         base_power LOAD93_player.value;
+  };
+
+  }
+
+object player {
+name LOAD93_player;
+file player/Load_profile_93.player;
+}
+
+object node {
+phases ABC;
+name "node_94";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_94; 
+     phases AS;
+     from "node_94";
+     to "tnode_94";
+     configuration "7575A";
+}
+object triplex_node {
+     name "tnode_94";
+     nominal_voltage 120;
+     phases AS;
+
+}
+
+//Step3
+     // Converted from load: 1770.0+443.6j
+object recorder {
+     name "Recorder94";
+     parent "meter_94";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_94.csv;
+}
+object triplex_line { 
+     name "tline_94";  
+     phases AS;
+     from "tnode_94";
+     to "meter_94";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_94";
+     phases AS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_94";
+  name "house_94";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house94_load";
+         base_power LOAD94_player.value;
+  };
+
+  }
+
+object player {
+name LOAD94_player;
+file player/Load_profile_94.player;
+}
+
+object node {
+phases ABC;
+name "node_95";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_95; 
+     phases CS;
+     from "node_95";
+     to "tnode_95";
+     configuration "7575C";
+}
+object triplex_node {
+     name "tnode_95";
+     nominal_voltage 120;
+     phases CS;
+
+}
+
+//Step3
+     // Converted from load: 6100.0+1528.8j
+object recorder {
+     name "Recorder95";
+     parent "meter_95";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_95.csv;
+}
+object triplex_line { 
+     name "tline_95";  
+     phases CS;
+     from "tnode_95";
+     to "meter_95";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_95";
+     phases CS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_95";
+  name "house_95";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house95_load";
+         base_power LOAD95_player.value;
+  };
+
+  }
+
+object player {
+name LOAD95_player;
+file player/Load_profile_95.player;
+}
+
+object node {
+phases ABC;
+name "node_96";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_96; 
+     phases CS;
+     from "node_96";
+     to "tnode_96";
+     configuration "7575C";
+}
+object triplex_node {
+     name "tnode_96";
+     nominal_voltage 120;
+     phases CS;
+
+}
+
+//Step3
+     // Converted from load: 6100.0+1528.8j
+object recorder {
+     name "Recorder96";
+     parent "meter_96";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_96.csv;
+}
+object triplex_line { 
+     name "tline_96";  
+     phases CS;
+     from "tnode_96";
+     to "meter_96";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_96";
+     phases CS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_96";
+  name "house_96";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house96_load";
+         base_power LOAD96_player.value;
+  };
+
+  }
+
+object player {
+name LOAD96_player;
+file player/Load_profile_96.player;
+}
+
+object node {
+phases ABC;
+name "node_97";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_97; 
+     phases CS;
+     from "node_97";
+     to "tnode_97";
+     configuration "7575C";
+}
+object triplex_node {
+     name "tnode_97";
+     nominal_voltage 120;
+     phases CS;
+
+}
+
+//Step3
+     // Converted from load: 15260.0+3824.5j
+object recorder {
+     name "Recorder97";
+     parent "meter_97";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_97.csv;
+}
+object triplex_line { 
+     name "tline_97";  
+     phases CS;
+     from "tnode_97";
+     to "meter_97";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_97";
+     phases CS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_97";
+  name "house_97";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+
+  object ZIPload {
+         name "house97_load";
+         base_power LOAD97_player.value;
+  };
+
+  }
+
+object player {
+name LOAD97_player;
+file player/Load_profile_97.player;
+}
+
+object node {
+phases ABC;
+name "node_98";
+nominal_voltage 7199.558;
+}
+
+object transformer { 
+     name transformer_98; 
+     phases CS;
+     from "node_98";
+     to "tnode_98";
+     configuration "7575C";
+}
+object triplex_node {
+     name "tnode_98";
+     nominal_voltage 120;
+     phases CS;
+
+}
+
+//Step3
+     // Converted from load: 4070.0+1020.0j
+object recorder {
+     name "Recorder98";
+     parent "meter_98";
+     interval 1800;
+     property measured_real_energy,measured_power,measured_real_power,measured_demand,monthly_bill,price;
+     file strom/strom_98.csv;
+}
+object triplex_line { 
+     name "tline_98";  
+     phases CS;
+     from "tnode_98";
+     to "meter_98";
+     length 15;
+     configuration "4/0Triplex";
+}
+object triplex_meter {  
+     name "meter_98";
+     phases CS;
+     bill_mode HOURLY;
+     power_market Market_1;
+     bill_day 1;
+     voltage_1 120; 
+     voltage_2 120;
+     voltage_N 0;    
+     nominal_voltage 120;  
+} 
+//Step5
+object house {
+  parent "meter_98";
+  name "house_98";
+
+  heating_system_type NONE;
+  cooling_system_type NONE;
+  	
+  object ZIPload {
+         name "house98_load";
+         base_power LOAD98_player.value;
+  };
+
+  }
+
+object player {
+name LOAD98_player;
+file player/Load_profile_98.player;
+}
+
+// Node Objects
+
+object node {
+     phases ABCN;
+     name "_HVMV_Sub_LSB";
+     nominal_voltage 7199.558;
+}
+
+object node {
+     phases ABCN;
+     name "connector1";
+     nominal_voltage 7199.558;
+}
+
+object node {
+     phases ABCN;
+     name "connector2";
+     nominal_voltage 7199.558;
+}
+
+object node {
+     phases ABCN;
+     name "connector3";
+     nominal_voltage 7199.558;
+}
+
+object node {
+     phases ABCN;
+     name "connector4";
+     nominal_voltage 7199.558;
+}
+
+object node {
+     phases ABCN;
+     name "connector5";
+     nominal_voltage 7199.558;
+}
+
+object node {
+     phases ABCN;
+     name "connector6";
+     nominal_voltage 7199.558;
+}
+
+object node {
+     phases ABCN;
+     name "connector7";
+     nominal_voltage 7199.558;
+}
+
+object node {
+     phases ABCN;
+     name "connector8";
+     nominal_voltage 7199.558;
+}
+
+object node {
+     phases ABCN;
+     name "connector9";
+     nominal_voltage 7199.558;
+}
+
+object node {
+     phases ABCN;
+     name "connector10";
+     nominal_voltage 7199.558;
+}
+
+object node {
+     phases ABCN;
+     name "connector11";
+     nominal_voltage 7199.558;
+}
+
+object node {
+     phases ABCN;
+     name "connector12";
+     nominal_voltage 7199.558;
+}
+
+object node {
+     phases ABCN;
+     name "connector13";
+     nominal_voltage 7199.558;
+}
+
+object node {
+     phases ABCN;
+     name "connector14";
+     nominal_voltage 7199.558;
+}
+
+object node {
+     phases ABCN;
+     name "connector15";
+     nominal_voltage 7199.558;
+}
+
+object node {
+     phases ABCN;
+     name "connector16";
+     nominal_voltage 7199.558;
+}
+
+object node {
+     phases ABCN;
+     name "connector17";
+     nominal_voltage 7199.558;
+}
+
+object node {
+     phases ABCN;
+     name "connector18";
+     nominal_voltage 7199.558;
+}
+
+object node {
+     phases ABCN;
+     name "connector19";
+     nominal_voltage 7199.558;
+}
+
+object node {
+     phases ABCN;
+     name "connector20";
+     nominal_voltage 7199.558;
+}
+
+object node {
+     phases ABCN;
+     name "connector21";
+     nominal_voltage 7199.558;
+}
+
+object node {
+     phases ABCN;
+     name "connector22";
+     nominal_voltage 7199.558;
+}
+
+object node {
+     phases ABCN;
+     name "connector23";
+     nominal_voltage 7199.558;
+}
+
+object node {
+     phases ABCN;
+     name "connector24";
+     nominal_voltage 7199.558;
+}
+
+object node {
+     phases ABCN;
+     name "connector25";
+     nominal_voltage 7199.558;
+}
+
+object node {
+     phases ABCN;
+     name "connector26";
+     nominal_voltage 7199.558;
+}
+
+//group collectors for apartment buildings
+
+object collector {
+	name "apartment_buidling1";
+	group "class=triplex_meter AND groupid=building1";
+	property sum(measured_real_power);
+	file strom/apartment_building1_power.csv;
+	interval 1800;
+}
+
+object collector {
+	name "apartment_buidling2";
+	group "class=triplex_meter AND groupid=building2";
+	property sum(measured_real_power);
+	file strom/apartment_building2_power.csv;
+	interval 1800;
+}
+
+object collector {
+	name "apartment_buidling3";
+	group "class=triplex_meter AND groupid=building3";
+	property sum(measured_real_power);
+	file strom/apartment_building3_power.csv;
+	interval 1800;
+}
+
+object collector {
+	name "apartment_buidling4";
+	group "class=triplex_meter AND groupid=building4";
+	property sum(measured_real_power);
+	file strom/apartment_building4_power.csv;
+	interval 1800;
+}
+
+object collector {
+	name "apartment_buidling5";
+	group "class=triplex_meter AND groupid=building5";
+	property sum(measured_real_power);
+	file strom/apartment_building5_power.csv;
+	interval 1800;
+}
+
+object collector {
+	name "apartment_buidling6";
+	group "class=triplex_meter AND groupid=building6";
+	property sum(measured_real_power);
+	file strom/apartment_building6_power.csv;
+	interval 1800;
+}
+
+
+
+
+// Overhead Line Conductors and configurations.
+object overhead_line_conductor {
+     name "1/0_ACSR";
+     geometric_mean_radius 0.135890cm;
+     resistance 0.646847Ohm/km;
+     rating.summer.emergency 260 A;
+     rating.summer.continuous 260 A;
+     rating.winter.emergency 260 A;
+     rating.winter.continuous 260 A;
+}
+
+object overhead_line_conductor {
+     name "600_CU";
+     geometric_mean_radius 0.838200cm;
+     resistance 0.062323Ohm/km;
+     rating.summer.emergency 536 A;
+     rating.summer.continuous 536 A;
+     rating.winter.emergency 536 A;
+     rating.winter.continuous 536 A;
+}
+
+object overhead_line_conductor {
+     name "4_DPX";
+     geometric_mean_radius 0.213360cm;
+     resistance 1.522297Ohm/km;
+     rating.summer.emergency 136 A;
+     rating.summer.continuous 136 A;
+     rating.winter.emergency 136 A;
+     rating.winter.continuous 136 A;
+}
+
+object overhead_line_conductor {
+     name "2_ACSR";
+     geometric_mean_radius 0.127508cm;
+     resistance 1.010163Ohm/km;
+     rating.summer.emergency 200 A;
+     rating.summer.continuous 200 A;
+     rating.winter.emergency 200 A;
+     rating.winter.continuous 200 A;
+}
+
+object overhead_line_conductor {
+     name "4_ACSR";
+     geometric_mean_radius 0.133096cm;
+     resistance 1.572497Ohm/km;
+     rating.summer.emergency 150 A;
+     rating.summer.continuous 150 A;
+     rating.winter.emergency 150 A;
+     rating.winter.continuous 150 A;
+}
+
+object overhead_line_conductor {
+     name "2/0_WPAL";
+     geometric_mean_radius 0.155448cm;
+     resistance 0.530030Ohm/km;
+     rating.summer.emergency 300 A;
+     rating.summer.continuous 300 A;
+     rating.winter.emergency 300 A;
+     rating.winter.continuous 300 A;
+}
+
+object overhead_line_conductor {
+     name "1/0_TPX";
+     geometric_mean_radius 0.347980cm;
+     resistance 0.114332Ohm/km;
+     rating.summer.emergency 205 A;
+     rating.summer.continuous 205 A;
+     rating.winter.emergency 205 A;
+     rating.winter.continuous 205 A;
+}
+
+object overhead_line_conductor {
+     name "4_TPX";
+     geometric_mean_radius 0.213360cm;
+     resistance 1.522297Ohm/km;
+     rating.summer.emergency 115 A;
+     rating.summer.continuous 115 A;
+     rating.winter.emergency 115 A;
+     rating.winter.continuous 115 A;
+}
+
+object overhead_line_conductor {
+     name "1/0_3W_CS";
+     geometric_mean_radius 0.347980cm;
+     resistance 0.603674Ohm/km;
+     rating.summer.emergency 200 A;
+     rating.summer.continuous 200 A;
+     rating.winter.emergency 200 A;
+     rating.winter.continuous 200 A;
+}
+
+object overhead_line_conductor {
+     name "2_WPAL";
+     geometric_mean_radius 0.127508cm;
+     resistance 1.050198Ohm/km;
+     rating.summer.emergency 155 A;
+     rating.summer.continuous 155 A;
+     rating.winter.emergency 155 A;
+     rating.winter.continuous 155 A;
+}
+
+object overhead_line_conductor {
+     name "4/0_TPX";
+     geometric_mean_radius 0.480568cm;
+     resistance 0.301837Ohm/km;
+     rating.summer.emergency 318 A;
+     rating.summer.continuous 318 A;
+     rating.winter.emergency 318 A;
+     rating.winter.continuous 318 A;
+}
+
+object overhead_line_conductor {
+     name "DEFAULT";
+     geometric_mean_radius 0.883920cm;
+     resistance 0.121789Ohm/km;
+     rating.summer.emergency 89 A;
+     rating.summer.continuous 89 A;
+     rating.winter.emergency 89 A;
+     rating.winter.continuous 89 A;
+}
+
+object overhead_line_conductor {
+     name "397_ACSR";
+     geometric_mean_radius 0.731520cm;
+     resistance 0.159692Ohm/km;
+     rating.summer.emergency 630 A;
+     rating.summer.continuous 630 A;
+     rating.winter.emergency 630 A;
+     rating.winter.continuous 630 A;
+}
+
+object overhead_line_conductor {
+     name "6_WPAL";
+     geometric_mean_radius 0.120142cm;
+     resistance 2.430120Ohm/km;
+     rating.summer.emergency 115 A;
+     rating.summer.continuous 115 A;
+     rating.winter.emergency 115 A;
+     rating.winter.continuous 115 A;
+}
+
+object overhead_line_conductor {
+     name "4_WPAL";
+     geometric_mean_radius 0.213360cm;
+     resistance 1.528212Ohm/km;
+     rating.summer.emergency 150 A;
+     rating.summer.continuous 150 A;
+     rating.winter.emergency 150 A;
+     rating.winter.continuous 150 A;
+}
+
+object overhead_line_conductor {
+     name "2/0_ACSR";
+     geometric_mean_radius 0.155448cm;
+     resistance 0.530030Ohm/km;
+     rating.summer.emergency 300 A;
+     rating.summer.continuous 300 A;
+     rating.winter.emergency 300 A;
+     rating.winter.continuous 300 A;
+}
+
+object line_spacing {
+     name SinglePhase1A;
+     distance_AN 2.3062m;
+}
+
+object line_spacing {
+     name SinglePhase1B;
+     distance_BN 2.3062m;
+}
+
+object line_spacing {
+     name SinglePhase1C;
+     distance_CN 2.3062m;
+}
+
+object line_spacing {
+     name TwoPhase1AC;
+     distance_AC 1.2192m;
+     distance_CN 1.5911m;
+     distance_AN 1.70388m;
+}
+
+object line_spacing {
+     name ThreePhase1;
+     distance_AB 0.97584m;
+     distance_AC 1.2192m;
+     distance_BC 0.762m;
+     distance_BN 2.1336m;
+     distance_AN 1.70388m;
+     distance_CN 1.5911m;
+}
+
+object line_configuration {
+     name "1PH-x4_ACSRx4_ACSR";
+     conductor_B "4_ACSR";
+     conductor_N "4_ACSR";
+     spacing SinglePhase1B;
+}
+
+object line_configuration {
+     name "1PH-xx4_ACSR4_ACSR";
+     conductor_C "4_ACSR";
+     conductor_N "4_ACSR";
+     spacing SinglePhase1C;
+}
+
+object line_configuration {
+     name "1PH-x2_ACSRx2_ACSR";
+     conductor_B "2_ACSR";
+     conductor_N "2_ACSR";
+     spacing SinglePhase1B;
+}
+
+object line_configuration {
+     name "1PH-x4_ACSRx4_WPAL";
+     conductor_B "4_ACSR";
+     conductor_N "4_WPAL";
+     spacing SinglePhase1B;
+}
+
+object line_configuration {
+     name "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+     conductor_A "2/0_ACSR";
+     conductor_B "2/0_ACSR";
+     conductor_C "2/0_ACSR";
+     conductor_N "2_ACSR";
+     spacing ThreePhase1;
+}
+
+object line_configuration {
+     name "3PH_H-4_ACSR4_ACSR4_ACSR4_ACSR";
+     conductor_A "4_ACSR";
+     conductor_B "4_ACSR";
+     conductor_C "4_ACSR";
+     conductor_N "4_ACSR";
+     spacing ThreePhase1;
+}
+
+object line_configuration {
+     name "1PH-4_WPALxx2_WPAL";
+     conductor_A "4_ACSR";
+     conductor_N "4_ACSR";
+     spacing SinglePhase1A;
+}
+
+object line_configuration {
+     name "3PH_H-4_ACSR2_ACSR2_ACSR4_WPAL";
+     conductor_A "4_ACSR";
+     conductor_B "2_ACSR";
+     conductor_C "2_ACSR";
+     conductor_N "4_WPAL";
+     spacing ThreePhase1;
+}
+
+object line_configuration {
+     name "1PH-4_ACSRxx4_ACSR";
+     conductor_A "4_ACSR";
+     conductor_N "4_ACSR";
+     spacing SinglePhase1A;
+}
+
+object line_configuration {
+     name "3PH_H-4_ACSR4_ACSR4_ACSR4_WPAL";
+     conductor_A "4_ACSR";
+     conductor_B "4_ACSR";
+     conductor_C "4_ACSR";
+     conductor_N "4_WPAL";
+     spacing ThreePhase1;
+}
+
+object line_configuration {
+     name "1PH-2_ACSRxx2_ACSR";
+     conductor_A "2_ACSR";
+     conductor_N "2_ACSR";
+     spacing SinglePhase1A;
+}
+
+object line_configuration {
+     name "1PH-4_WPALxx4_ACSR";
+     conductor_A "4_WPAL";
+     conductor_N "4_ACSR";
+     spacing SinglePhase1A;
+}
+
+object line_configuration {
+     name "3PH_H-397_ACSR397_ACSR397_ACSR2/0_ACSR";
+     conductor_A "397_ACSR";
+     conductor_B "397_ACSR";
+     conductor_C "397_ACSR";
+     conductor_N "2/0_ACSR";
+     spacing ThreePhase1;
+}
+
+object line_configuration {
+     name "1PH-2_ACSRxx4_ACSR";
+     conductor_A "2_ACSR";
+     conductor_N "4_ACSR";
+     spacing SinglePhase1A;
+}
+
+object line_configuration {
+     name "1PH-xx2_ACSR2_ACSR";
+     conductor_C "2_ACSR";
+     conductor_N "2_ACSR";
+     spacing SinglePhase1C;
+}
+
+object line_configuration {
+     name "1PH-xx4_WPAL4_WPAL";
+     conductor_C "4_WPAL";
+     conductor_N "4_WPAL";
+     spacing SinglePhase1C;
+}
+
+object line_configuration {
+     name "1PH-x4_WPALx4_WPAL";
+     conductor_B "4_WPAL";
+     conductor_N "4_WPAL";
+     spacing SinglePhase1B;
+}
+
+object line_configuration {
+     name "1PH-xx4_WPAL4_ACSR";
+     conductor_C "4_WPAL";
+     conductor_N "4_ACSR";
+     spacing SinglePhase1C;
+}
+
+object line_configuration {
+     name "1PH-x2_ACSRx1/0_TPX";
+     conductor_B "2_ACSR";
+     conductor_N "1/0_TPX";
+     spacing SinglePhase1B;
+}
+
+object line_configuration {
+     name "1PH-4_ACSRxx4_WPAL";
+     conductor_A "4_ACSR";
+     conductor_N "4_WPAL";
+     spacing SinglePhase1A;
+}
+
+object line_configuration {
+     name "1PH-xx4_ACSR1/0_TPX";
+     conductor_C "4_ACSR";
+     conductor_N "1/0_TPX";
+     spacing SinglePhase1C;
+}
+
+object line_configuration {
+     name "3PH_H-4_WPAL4_WPAL4_WPAL4_ACSR";
+     conductor_A "4_WPAL";
+     conductor_B "4_WPAL";
+     conductor_C "4_WPAL";
+     conductor_N "4_ACSR";
+     spacing ThreePhase1;
+}
+
+object line_configuration {
+     name "1PH-x4_WPALx4_ACSR";
+     conductor_B "4_WPAL";
+     conductor_N "4_ACSR";
+     spacing SinglePhase1B;
+}
+
+object line_configuration {
+     name "1PH-4_WPALxx4_WPAL";
+     conductor_A "4_WPAL";
+     conductor_N "4_WPAL";
+     spacing SinglePhase1A;
+}
+
+object line_configuration {
+     name "3PH_H-4_WPAL4_WPAL4_WPAL4_WPAL";
+     conductor_A "4_WPAL";
+     conductor_B "4_WPAL";
+     conductor_C "4_WPAL";
+     conductor_N "4_WPAL";
+     spacing ThreePhase1;
+}
+
+object line_configuration {
+     name "3PH_H-2_ACSR2_ACSR2_ACSR2_ACSR";
+     conductor_A "2_ACSR";
+     conductor_B "2_ACSR";
+     conductor_C "2_ACSR";
+     conductor_N "2_ACSR";
+     spacing ThreePhase1;
+}
+
+object line_configuration {
+     name "1PH-4_ACSRxx1/0_TPX";
+     conductor_A "4_ACSR";
+     conductor_N "1/0_TPX";
+     spacing SinglePhase1A;
+}
+
+object line_configuration {
+     name "3PH_H-4_ACSR2_ACSR2_ACSR4_ACSR";
+     conductor_A "4_ACSR";
+     conductor_B "2_ACSR";
+     conductor_C "2_ACSR";
+     conductor_N "4_ACSR";
+     spacing ThreePhase1;
+}
+
+object line_configuration {
+     name "1PH-xx4_ACSR4_WPAL";
+     conductor_C "4_ACSR";
+     conductor_N "4_WPAL";
+     spacing SinglePhase1C;
+}
+
+object line_configuration {
+     name "1PH-4_ACSRxx2_ACSR";
+     conductor_A "4_ACSR";
+     conductor_N "2_ACSR";
+     spacing SinglePhase1A;
+}
+
+object line_configuration {
+     name "1PH-x4_WPALx1/0_TPX";
+     conductor_B "4_WPAL";
+     conductor_N "1/0_TPX";
+     spacing SinglePhase1B;
+}
+
+object line_configuration {
+     name "1PH-xx4_ACSR1/0_ACSR";
+     conductor_C "4_ACSR";
+     conductor_N "1/0_ACSR";
+     spacing SinglePhase1C;
+}
+
+object line_configuration {
+     name "1PH-2_ACSRxx4_WPAL";
+     conductor_A "2_ACSR";
+     conductor_N "4_WPAL";
+     spacing SinglePhase1A;
+}
+
+object line_configuration {
+     name "1PH-xx2/0_ACSR1/0_TPX";
+     conductor_C "2/0_ACSR";
+     conductor_N "1/0_TPX";
+     spacing SinglePhase1C;
+}
+
+object line_configuration {
+     name "2PH_H-2_ACSRx2_ACSR2_ACSR";
+     conductor_A "2_ACSR";
+     conductor_C "2_ACSR";
+     conductor_N "2_ACSR";
+     spacing TwoPhase1AC;
+}
+
+object line_configuration {
+     name "1PH-2_WPALxx2_WPAL";
+     conductor_A "2_WPAL";
+     conductor_N "2_WPAL";
+     spacing SinglePhase1A;
+}
+
+object line_configuration {
+     name "1PH-2_ACSRxx4/0_TPX";
+     conductor_A "2_ACSR";
+     conductor_N "4/0_TPX";
+     spacing SinglePhase1A;
+}
+
+object line_configuration {
+     name "3PH_H-397_ACSR397_ACSR397_ACSR4_WPAL";
+     conductor_A "397_ACSR";
+     conductor_B "397_ACSR";
+     conductor_C "397_ACSR";
+     conductor_N "4_WPAL";
+     spacing ThreePhase1;
+}
+
+object line_configuration {
+     name "3PH_H-397_ACSR397_ACSR397_ACSR397_ACSR";
+     conductor_A "397_ACSR";
+     conductor_B "397_ACSR";
+     conductor_C "397_ACSR";
+     conductor_N "397_ACSR";
+     spacing ThreePhase1;
+}
+
+object line_configuration {
+     name "1PH-xx2_ACSR1/0_TPX";
+     conductor_C "2_ACSR";
+     conductor_N "1/0_TPX";
+     spacing SinglePhase1C;
+}
+
+object line_configuration {
+     name "1PH-x4_ACSRx2_WPAL";
+     conductor_B "4_ACSR";
+     conductor_N "2_WPAL";
+     spacing SinglePhase1B;
+}
+
+object line_configuration {
+     name "1PH-x4_ACSRx4_DPX";
+     conductor_B "4_ACSR";
+     conductor_N "4_DPX";
+     spacing SinglePhase1B;
+}
+
+object line_configuration {
+     name "3PH_H-2_ACSR2_ACSR4_ACSR4_ACSR";
+     conductor_A "2_ACSR";
+     conductor_B "2_ACSR";
+     conductor_C "4_ACSR";
+     conductor_N "4_ACSR";
+     spacing ThreePhase1;
+}
+
+object line_configuration {
+     name "1PH-4_WPALxx1/0_TPX";
+     conductor_A "4_WPAL";
+     conductor_N "1/0_TPX";
+     spacing SinglePhase1A;
+}
+
+object line_configuration {
+     name "1PH-x4_ACSRx1/0_TPX";
+     conductor_B "4_ACSR";
+     conductor_N "1/0_TPX";
+     spacing SinglePhase1B;
+}
+
+object line_configuration {
+     name "1PH-4_ACSRxx1/0_3W_CS";
+     conductor_A "4_ACSR";
+     conductor_N "1/0_3W_CS";
+     spacing SinglePhase1A;
+}
+
+object line_configuration {
+     name "1PH-x2_ACSRx4_ACSR";
+     conductor_B "2_ACSR";
+     conductor_N "4_ACSR";
+     spacing SinglePhase1B;
+}
+
+object line_configuration {
+     name "1PH-x2_ACSRx1/0_3W_CS";
+     conductor_B "2_ACSR";
+     conductor_N "1/0_3W_CS";
+     spacing SinglePhase1B;
+}
+
+object line_configuration {
+     name "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2/0_ACSR";
+     conductor_A "2/0_ACSR";
+     conductor_B "2/0_ACSR";
+     conductor_C "2/0_ACSR";
+     conductor_N "2/0_ACSR";
+     spacing ThreePhase1;
+}
+
+object line_configuration {
+     name "1PH-2_ACSRxx1/0_TPX";
+     conductor_A "2_ACSR";
+     conductor_N "1/0_TPX";
+     spacing SinglePhase1A;
+}
+
+object line_configuration {
+     name "3PH_H-4_WPAL4_WPAL4_WPAL1/0_TPX";
+     conductor_A "4_WPAL";
+     conductor_B "4_WPAL";
+     conductor_C "4_WPAL";
+     conductor_N "1/0_TPX";
+     spacing ThreePhase1;
+}
+
+object line_configuration {
+     name "1PH-x4_WPALx2_ACSR";
+     conductor_B "4_WPAL";
+     conductor_N "2_ACSR";
+     spacing SinglePhase1B;
+}
+
+object line_configuration {
+     name "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_WPAL";
+     conductor_A "2/0_ACSR";
+     conductor_B "2/0_ACSR";
+     conductor_C "2/0_ACSR";
+     conductor_N "2_WPAL";
+     spacing ThreePhase1;
+}
+
+object line_configuration {
+     name "1PH-xx4_ACSR2_ACSR";
+     conductor_C "4_ACSR";
+     conductor_N "2_ACSR";
+     spacing SinglePhase1C;
+}
+
+object line_configuration {
+     name "1PH-x4_ACSRx4_TPX";
+     conductor_B "4_ACSR";
+     conductor_N "4_TPX";
+     spacing SinglePhase1B;
+}
+
+object line_configuration {
+     name "3PH_H-4_ACSR4_ACSR4_ACSR4_TPX";
+     conductor_A "4_ACSR";
+     conductor_B "4_ACSR";
+     conductor_C "4_ACSR";
+     conductor_N "4_TPX";
+     spacing ThreePhase1;
+}
+
+object line_configuration {
+     name "1PH-4_ACSRxx6_WPAL";
+     conductor_A "4_ACSR";
+     conductor_N "6_WPAL";
+     spacing SinglePhase1A;
+}
+
+object line_configuration {
+     name "1PH-xx4_ACSR4_TPX";
+     conductor_C "4_ACSR";
+     conductor_N "4_TPX";
+     spacing SinglePhase1C;
+}
+
+object line_configuration {
+     name "3PH_H-397_ACSR397_ACSR397_ACSR2/0_WPAL";
+     conductor_A "397_ACSR";
+     conductor_B "397_ACSR";
+     conductor_C "397_ACSR";
+     conductor_N "2/0_WPAL";
+     spacing ThreePhase1;
+}
+
+object line_configuration {
+     name "1PH-2/0_ACSRxx2_ACSR";
+     conductor_A "2/0_ACSR";
+     conductor_N "2_ACSR";
+     spacing SinglePhase1A;
+}
+
+object line_configuration {
+     name "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR4_ACSR";
+     conductor_A "2/0_ACSR";
+     conductor_B "2/0_ACSR";
+     conductor_C "2/0_ACSR";
+     conductor_N "4_ACSR";
+     spacing ThreePhase1;
+}
+
+object line_configuration {
+     name "1PH-xx4_WPAL1/0_TPX";
+     conductor_C "4_WPAL";
+     conductor_N "1/0_TPX";
+     spacing SinglePhase1C;
+}
+
+object line_configuration {
+     name "1PH-xx6_WPAL6_WPAL";
+     conductor_C "6_WPAL";
+     conductor_N "6_WPAL";
+     spacing SinglePhase1C;
+}
+
+object line_configuration {
+     name "1PH-x2_ACSRx4_TPX";
+     conductor_B "2_ACSR";
+     conductor_N "4_TPX";
+     spacing SinglePhase1B;
+}
+
+object line_configuration {
+     name "3PH_H-4_ACSR4_ACSR4_ACSR2_WPAL";
+     conductor_A "4_ACSR";
+     conductor_B "4_ACSR";
+     conductor_C "4_ACSR";
+     conductor_N "2_WPAL";
+     spacing ThreePhase1;
+}
+
+object line_configuration {
+     name "1PH-x4_ACSRx1/0_3W_CS";
+     conductor_B "4_ACSR";
+     conductor_N "1/0_3W_CS";
+     spacing SinglePhase1B;
+}
+
+object line_configuration {
+     name "1PH-xx2_ACSR4_DPX";
+     conductor_C "2_ACSR";
+     conductor_N "4_DPX";
+     spacing SinglePhase1B;
+}
+
+object line_configuration {
+     name "3P_1/0_AXNJ_DB";
+     conductor_A "1/0_ACSR"; //These are not the correct values,
+     conductor_B "1/0_ACSR"; //but are used to approximate for 3P & 1P.
+     conductor_C "1/0_ACSR";
+     conductor_N "1/0_ACSR";
+     spacing ThreePhase1;
+}
+
+object line_configuration {
+     name "1P_1/0_AXNJ_DB_A";
+     conductor_A "1/0_ACSR";
+     conductor_N "1/0_ACSR";
+     spacing SinglePhase1A;
+}
+
+object line_configuration {
+     name "1P_1/0_AXNJ_DB_B";
+     conductor_B "1/0_ACSR";
+     conductor_N "1/0_ACSR";
+     spacing SinglePhase1B;
+}
+
+object line_configuration {
+     name "1P_1/0_AXNJ_DB_C";
+     conductor_C "1/0_ACSR";
+     conductor_N "1/0_ACSR";
+     spacing SinglePhase1C;
+}
+
+object line_configuration {
+     name "CAP_LINE";      //Also known as 1PH-Connector.
+     conductor_A "600_CU"; //These are not the correct values, but
+     conductor_B "600_CU"; //will be used to approx. low loss lines.
+     conductor_C "600_CU";
+     conductor_N "600_CU";
+     spacing ThreePhase1;
+}
+
+object line_configuration {
+     name "3PH-Connector";
+     conductor_A "600_CU";
+     conductor_B "600_CU";
+     conductor_C "600_CU";
+     conductor_N "600_CU";
+     spacing ThreePhase1;
+}
+
+object triplex_line_conductor {
+     name "4/0triplex";
+     resistance 1.535;
+     geometric_mean_radius 0.0111;
+     rating.summer.emergency 315 A;
+     rating.summer.continuous 315 A;
+     rating.winter.emergency 315 A;
+     rating.winter.continuous 315 A;
+}
+
+object triplex_line_configuration {
+     name "4/0Triplex";
+     conductor_1 "4/0triplex";
+     conductor_2 "4/0triplex";
+     conductor_N "4/0triplex";
+     insulation_thickness 0.08;
+     diameter 0.368;
+}
+
+object triplex_line_configuration {
+     name "750_Triplex";       //These values are not correct, but
+     conductor_1 "4/0triplex"; //there are only four of them.
+     conductor_2 "4/0triplex";
+     conductor_N "4/0triplex";
+     insulation_thickness 0.08;
+     diameter 0.368;
+}
+
+// Overhead Lines
+
+object overhead_line {
+     phases ABCN;
+     name "HVMV_Sub_connector";
+     from "_HVMV_Sub_LSB";
+     to "HVMV_Sub_48332";
+     length 0.010000km;
+     configuration "3PH-Connector";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_1";
+     from "HVMV_Sub_48332";
+     to "connector1";
+     length 0.619796km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_2";
+     from "connector1";
+     to "connector2";
+     length 0.024376km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_3";
+     from "connector2";
+     to "node_1";
+     length 0.042900km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_4";
+     from "node_1";
+     to "node_2";
+     length 0.039785km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_5";
+     from "node_2";
+     to "node_3";
+     length 0.032876km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_6";
+     from "node_3";
+     to "node_4";
+     length 0.036473km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_7";
+     from "node_4";
+     to "connector3";
+     length 0.028552km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_8";
+     from "connector3";
+     to "node_5";
+     length 0.005488km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_9";
+     from "node_5";
+     to "node_6";
+     length 0.003686km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_10";
+     from "node_6";
+     to "node_7";
+     length 0.036898km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_11";
+     from "node_7";
+     to "node_8";
+     length 0.020565km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_12";
+     from "node_8";
+     to "node_9";
+     length 0.007492km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_13";
+     from "node_9";
+     to "node_10";
+     length 0.005955km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_14";
+     from "node_10";
+     to "connector4";
+     length 0.013211km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_15";
+     from "connector3";
+     to "connector5";
+     length 0.017937km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_16";
+     from "connector5";
+     to "node_11";
+     length 0.035850km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_17";
+     from "connector5";
+     to "node_12";
+     length 0.017027km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_18";
+     from "connector5";
+     to "connector6";
+     length 0.015334km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_19";
+     from "connector6";
+     to "node_13";
+     length 0.030630km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_20";
+     from "node_13";
+     to "connector7";
+     length 0.049837km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_21";
+     from "connector7";
+     to "node_14";
+     length 0.003313km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_22";
+     from "connector7";
+     to "node_15";
+     length 0.040247km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_23";
+     from "connector7";
+     to "node_16";
+     length 0.030924km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_24";
+     from "node_16";
+     to "node_17";
+     length 0.004903km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_25";
+     from "node_17";
+     to "node_18";
+     length 0.025863km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_26";
+     from "node_17";
+     to "node_19";
+     length 0.012606km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_27";
+     from "node_19";
+     to "connector8";
+     length 0.004869km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_28";
+     from "connector8";
+     to "node_20";
+     length 0.013744km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_29";
+     from "connector8";
+     to "node_21";
+     length 0.004366km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_30";
+     from "connector8";
+     to "node_22";
+     length 0.030936km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_31";
+     from "node_22";
+     to "node_23";
+     length 0.004858km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_32";
+     from "node_23";
+     to "node_24";
+     length 0.026651km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_33";
+     from "node_24";
+     to "connector9";
+     length 0.010387km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_34";
+     from "connector9";
+     to "node_25";
+     length 0.014271km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_35";
+     from "connector9";
+     to "node_26";
+     length 0.015272km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_36";
+     from "connector9";
+     to "node_27";
+     length 0.020022km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_37";
+     from "node_27";
+     to "node_28";
+     length 0.004274km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_38";
+     from "node_28";
+     to "node_29";
+     length 0.032930km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_39";
+     from "node_29";
+     to "node_30";
+     length 0.038484km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_40";
+     from "node_30";
+     to "connector10";
+     length 0.046105km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_41";
+     from "connector10";
+     to "node_31";
+     length 0.041373km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_42";
+     from "connector10";
+     to "node_32";
+     length 0.048067km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_43";
+     from "connector10";
+     to "connector11";
+     length 0.018316km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_44";
+     from "connector11";
+     to "node_33";
+     length 0.008546km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_45";
+     from "connector11";
+     to "node_34";
+     length 0.009755km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_46";
+     from "connector11";
+     to "connector12";
+     length 0.045053km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_47";
+     from "connector12";
+     to "node_35";
+     length 0.046309km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_48";
+     from "connector12";
+     to "node_37";
+     length 0.024321km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_49";
+     from "connector12";
+     to "node_39";
+     length 0.027075km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_50";
+     from "node_39";
+     to "connector13";
+     length 0.031569km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_51";
+     from "connector13";
+     to "node_40";
+     length 0.020349km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_52";
+     from "connector13";
+     to "node_43";
+     length 0.025807km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_53";
+     from "connector13";
+     to "connector14";
+     length 0.011974km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_54";
+     from "connector14";
+     to "node_44";
+     length 0.006072km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_55";
+     from "connector14";
+     to "node_45";
+     length 0.024667km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_56";
+     from "connector14";
+     to "connector4";
+     length 0.048161km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_57";
+     from "connector6";
+     to "node_46";
+     length 0.046958km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_58";
+     from "node_46";
+     to "node_47";
+     length 0.012507km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_59";
+     from "node_47";
+     to "node_48";
+     length 0.017902km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_60";
+     from "connector6";
+     to "node_49";
+     length 0.023629km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_61";
+     from "node_49";
+     to "connector15";
+     length 0.041604km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_62";
+     from "connector15";
+     to "node_50";
+     length 0.046967km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_63";
+     from "connector15";
+     to "node_51";
+     length 0.015159km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_64";
+     from "connector15";
+     to "connector16";
+     length 0.038254km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_65";
+     from "connector16";
+     to "node_54";
+     length 0.046185km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_66";
+     from "connector16";
+     to "node_55";
+     length 0.019891km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_67";
+     from "connector16";
+     to "connector17";
+     length 0.023111km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_68";
+     from "connector17";
+     to "node_56";
+     length 0.026329km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_69";
+     from "connector17";
+     to "node_57";
+     length 0.046002km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_70";
+     from "connector17";
+     to "node_58";
+     length 0.027254km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_71";
+     from "node_58";
+     to "node_59";
+     length 0.010477km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_72";
+     from "node_58";
+     to "node_60";
+     length 0.010906km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_73";
+     from "node_60";
+     to "node_61";
+     length 0.042391km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_74";
+     from "node_61";
+     to "node_62";
+     length 0.026548km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_75";
+     from "node_62";
+     to "node_27";
+     length 0.010572km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_76";
+     from "node_30";
+     to "node_63";
+     length 0.003311km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_77";
+     from "node_63";
+     to "connector18";
+     length 0.030862km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_78";
+     from "connector18";
+     to "connector19";
+     length 0.025975km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_79";
+     from "connector19";
+     to "node_64";
+     length 0.029452km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_80";
+     from "node_64";
+     to "node_65";
+     length 0.010211km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_81";
+     from "node_65";
+     to "connector20";
+     length 0.012661km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_82";
+     from "connector20";
+     to "node_66";
+     length 0.013571km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_83";
+     from "connector20";
+     to "connector21";
+     length 0.048206km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_84";
+     from "connector21";
+     to "node_70";
+     length 0.041884km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_85";
+     from "connector21";
+     to "node_74";
+     length 0.049133km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_86";
+     from "connector4";
+     to "node_75";
+     length 0.005414km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_87";
+     from "node_75";
+     to "node_74";
+     length 0.046433km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_88";
+     from "connector19";
+     to "connector22";
+     length 0.018702km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_89";
+     from "connector22";
+     to "node_76";
+     length 0.010926km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_90";
+     from "connector22";
+     to "node_81";
+     length 0.025152km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_91";
+     from "node_81";
+     to "node_82";
+     length 0.025925km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_92";
+     from "node_82";
+     to "connector23";
+     length 0.038377km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_93";
+     from "connector23";
+     to "node_83";
+     length 0.015985km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_94";
+     from "connector23";
+     to "node_84";
+     length 0.006381km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_95";
+     from "connector23";
+     to "connector24";
+     length 0.043856km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_96";
+     from "connector24";
+     to "node_85";
+     length 0.040127km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_97";
+     from "connector24";
+     to "node_86";
+     length 0.017752km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_98";
+     from "connector24";
+     to "node_87";
+     length 0.048885km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_99";
+     from "node_87";
+     to "node_88";
+     length 0.018647km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_100";
+     from "node_88";
+     to "node_89";
+     length 0.036266km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_101";
+     from "node_81";
+     to "node_90";
+     length 0.008189km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_102";
+     from "node_90";
+     to "node_91";
+     length 0.035597km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_103";
+     from "node_91";
+     to "node_92";
+     length 0.018893km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_104";
+     from "node_92";
+     to "connector25";
+     length 0.042613km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_105";
+     from "connector25";
+     to "node_93";
+     length 0.037510km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_106";
+     from "connector25";
+     to "connector26";
+     length 0.020980km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_107";
+     from "connector26";
+     to "node_94";
+     length 0.017428km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_108";
+     from "connector26";
+     to "node_95";
+     length 0.005632km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_109";
+     from "connector26";
+     to "node_96";
+     length 0.043168km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_110";
+     from "node_96";
+     to "node_97";
+     length 0.045969km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_111";
+     from "node_97";
+     to "node_98";
+     length 0.014611km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+object overhead_line {
+     phases ABCN;
+     name "Line_112";
+     from "node_98";
+     to "node_87";
+     length 0.014611km;
+     configuration "3PH_H-2/0_ACSR2/0_ACSR2/0_ACSR2_ACSR";
+}
+
+// Floor area: smallest: 1000000.0, largest: 0.0
+// Total number of houses: 198// Load Scalar: 1.000000// House Scalar: 6.000000// ZIP Scalar: 3.000000

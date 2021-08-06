@@ -1,0 +1,87 @@
+#this script allows to get data from the london smartmeter dataset and converts it to useable player data for gridlab-d
+#####copy this first into your rstudio
+library(sets)
+library(lubridate)
+library(ddplyr)
+########################################
+#copy this code into your Rstudio, press enter and execute it with filterMinMaxDate
+#you need to be in the folder of the London Smartmeter Dataset
+#if an error occurs maybe the nameoffile isnt correct and need to be changed.
+filterMinMaxDate<- function()
+{
+datalist1 = list()
+datalist2 = list()
+for(i in 1:20) {
+nameoffile<-paste("Power-Networks-LCL-June2015(withAcornGps)v2_",i,".csv", sep="")
+file <- read.table(file = nameoffile,header=TRUE, sep = ",",stringsAsFactors = FALSE,comment.char = "")
+datalist1[[i]]<-aggregate(DateTime ~ LCLid, file, min)
+datalist2[[i]]<-aggregate(DateTime ~ LCLid, file, max) 
+
+}
+
+df1 = do.call(rbind, datalist1)
+df2 = do.call(rbind, datalist2)
+df1<-merge(x = df1, y = df2, by = "LCLid", all = TRUE)
+colnames(df1) <- c("LCLid", "min DateTime","max DateTime")
+df1<<-df1
+}
+############################################
+#this function filters the dataset by a start- and an enddate
+filterByDate<-function()
+{
+datalist3 = list()
+datalist4 = list()
+#how many files are used for filtering(current its 20 files)
+for(i in 1:20) {
+nameoffile2<-paste("Power-Networks-LCL-June2015(withAcornGps)v2_",i,".csv", sep="")
+file2 <- read.table(file = nameoffile2,header=TRUE, sep = ",",stringsAsFactors = FALSE,comment.char = "")
+#these lines are checking that an LCLid has more than 39000 values and filters every LCLid which is under this threshold
+ind<- with(file2,table(file2$LCLid) > 39000)
+ind <- ind[ind == TRUE]
+ind <-rownames(ind)
+file2<- subset(file2, LCLid %in% ind)
+#in this lane its possible to change the start and enddate
+datalist3[[i]]<-file2[(file2[[3]] > "2012-04-08" & file2[[3]] <= "2014-02-28"),] 
+}
+df3 <<- do.call(rbind, datalist3)
+df3
+}
+###########################################
+#this function gives you the minDate and maxDate of your filterByDate function 
+#its more a helper function for debugging
+checkFilterByDate<-function()
+{
+for(i in 1:20)
+{
+datalist5 = list()
+datalist6 = list()
+
+datalist5[[i]]<-aggregate(DateTime ~ LCLid, df3, min)
+datalist6[[i]]<-aggregate(DateTime ~ LCLid, df3, max) 
+
+}
+df5 = do.call(rbind, datalist5)
+df6 = do.call(rbind, datalist6)
+df5<-merge(x = df5, y = df6, by = "LCLid", all = TRUE)
+colnames(df5) <- c("LCLid", "min DateTime","max DateTime")
+df5 <<-df5
+}
+#############################################
+#this function get one LCLid and writes all values of the LCLid into .csv in a folder which is called Haus
+#before using writeCSV, filterByDate needs to be executed atleast once
+writeCSV<-function()
+{
+#define a set to get the number of LCLid 
+setwithLCLid<-as.set(df3[[1]])
+#get number of LCLid
+lengthofset=length(setwithLCLid)
+#iterates over number of LCLid and takes one house and write all values in a .csv
+for(i in 1:lengthofset) {
+elementofset<-set(as.character(setwithLCLid)[i])
+fileout<- subset(df3, LCLid %in% elementofset)
+fileout<-fileout[,3:4]
+haus<-file.path("Haus", paste("Load_profile_",i, ".player", sep=""))
+#write.csv(fileout,haus, row.names = FALSE)
+write.table(fileout,haus, row.names = FALSE,col.names=FALSE,quote = FALSE, sep=",")
+}
+}
